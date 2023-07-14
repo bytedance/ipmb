@@ -1,0 +1,17 @@
+[package]
+name = "ipmb-ffi"
+version.workspace = true
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+crate-type = ["lib", "staticlib", "cdylib"]
+
+[dependencies]
+
+[dependencies.ipmb]
+workspace = true
+
+[build-dependencies]
+cbindgen = "0.24.3"

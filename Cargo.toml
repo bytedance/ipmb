@@ -1,0 +1,30 @@
+[workspace]
+resolver = "2"
+members = [
+    "ipmb",
+    "ipmb-derive",
+    "ipmb-ffi",
+    "ipmb-js",
+]
+
+[workspace.package]
+version = "0.7.2"
+rust-version = "1.65"
+
+[workspace.dependencies.ipmb]
+version = "0.7.2"
+path = "ipmb"
+
+[workspace.dependencies.ipmb-derive]
+version = "0.5.0"
+path = "ipmb-derive"
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+lto = true
+debug = true
+split-debuginfo = "packed"
+rpath = true

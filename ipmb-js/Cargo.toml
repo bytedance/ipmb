@@ -1,0 +1,22 @@
+[package]
+name = "ipmb-js"
+version.workspace = true
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+napi-derive = "2.12.2"
+
+[dependencies.ipmb]
+workspace = true
+
+[dependencies.napi]
+version = "2.12.1"
+features = []
+
+[build-dependencies]
+napi-build = "2.0.1"

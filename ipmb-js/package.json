@@ -1,0 +1,19 @@
+{
+  "name": "ipmb-js",
+  "version": "0.7.2",
+  "description": "ipmb-js",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "author": "ipmb developers",
+  "private": false,
+  "files": [
+    "index.d.ts",
+    "aarch64-apple-darwin/release/ipmb_js.node",
+    "x86_64-apple-darwin/release/ipmb_js.node",
+    "x86_64-pc-windows-msvc/release/ipmb_js.node",
+    "i686-pc-windows-msvc/release/ipmb_js.node"
+  ],
+  "napi": {
+    "name": "ipmb_js"
+  }
+}
