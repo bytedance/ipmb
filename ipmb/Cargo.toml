@@ -5,6 +5,10 @@ version.workspace = true
 authors = ["ipmb developers"]
 edition = "2021"
 rust-version.workspace = true
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/bytedance/ipmb"
+readme = "../README.md"
+categories = ["ipc"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
