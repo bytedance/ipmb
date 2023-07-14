@@ -14,4 +14,4 @@ crate-type = ["lib", "staticlib", "cdylib"]
 workspace = true
 
 [build-dependencies]
-cbindgen = "0.24.3"
+cbindgen = "0.24.5"

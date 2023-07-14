@@ -8,15 +8,15 @@ members = [
 ]
 
 [workspace.package]
-version = "0.7.2"
+version = "0.7.3"
 rust-version = "1.65"
 
 [workspace.dependencies.ipmb]
-version = "0.7.2"
+version = "0.7.3"
 path = "ipmb"
 
 [workspace.dependencies.ipmb-derive]
-version = "0.5.0"
+version = "0.5.1"
 path = "ipmb-derive"
 
 [profile.dev]

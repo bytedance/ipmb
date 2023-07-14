@@ -76,9 +76,9 @@ checksum = "6c58ec36aac5066d5ca17df51b3e70279f5670a72102f5752cb7e7c856adfc70"
 
 [[package]]
 name = "cbindgen"
-version = "0.24.3"
+version = "0.24.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a6358dedf60f4d9b8db43ad187391afe959746101346fe51bb978126bec61dfb"
+checksum = "4b922faaf31122819ec80c4047cc684c6979a087366c069611e33649bf98e18d"
 dependencies = [
  "clap",
  "heck",
@@ -303,7 +303,7 @@ dependencies = [
 
 [[package]]
 name = "ipmb"
-version = "0.7.2"
+version = "0.7.3"
 dependencies = [
  "bincode",
  "bytesize",
@@ -328,7 +328,7 @@ dependencies = [
 
 [[package]]
 name = "ipmb-derive"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "quote",
  "syn",
@@ -336,7 +336,7 @@ dependencies = [
 
 [[package]]
 name = "ipmb-ffi"
-version = "0.7.2"
+version = "0.7.3"
 dependencies = [
  "cbindgen",
  "ipmb",
@@ -344,7 +344,7 @@ dependencies = [
 
 [[package]]
 name = "ipmb-js"
-version = "0.7.2"
+version = "0.7.3"
 dependencies = [
  "ipmb",
  "napi",

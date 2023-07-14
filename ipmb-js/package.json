@@ -1,6 +1,6 @@
 {
   "name": "ipmb-js",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "description": "ipmb-js",
   "main": "index.js",
   "types": "index.d.ts",
