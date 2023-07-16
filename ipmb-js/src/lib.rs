@@ -243,8 +243,8 @@ pub fn join(options: Options, timeout: Option<u32>, env: Env) -> Result<napi::Js
             async_resource_name,
             0,
             1,
-            ptr::null_mut(),
-            None,
+            local_buffer_ptr.cast_mut() as _,
+            Some(threadsafe_function_finalize),
             local_buffer_ptr.cast_mut() as _,
             Some(delegate_receiver),
             &mut tsfn,
@@ -411,6 +411,16 @@ extern "C" fn delegate_receiver(
                 }
             }
         }
+    }
+}
+
+extern "C" fn threadsafe_function_finalize(
+    _env: sys::napi_env,
+    finalize_data: *mut ffi::c_void,
+    _finalize_hint: *mut ffi::c_void,
+) {
+    unsafe {
+        Arc::from_raw(finalize_data as *const Mutex<LocalBuffer>);
     }
 }
 
