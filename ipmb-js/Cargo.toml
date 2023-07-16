@@ -16,7 +16,7 @@ workspace = true
 
 [dependencies.napi]
 version = "2.12.1"
-features = []
+features = ["napi4"]
 
 [build-dependencies]
 napi-build = "2.0.1"
