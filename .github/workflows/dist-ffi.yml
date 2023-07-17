@@ -1,0 +1,37 @@
+name: dist ffi
+
+on:
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  dist:
+    if: "startsWith(github.ref, 'refs/tags/')"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ macos-latest, windows-latest ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hustcer/setup-nu@v3
+        with:
+          version: '0.80'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+      - if: "matrix.os == 'macos-latest'"
+        run: |
+          nu -n -c "use action.nu *; dist ffi aarch64-apple-darwin x86_64-apple-darwin"
+      - if: "matrix.os == 'windows-latest'"
+        run: |
+          nu -n -c "use action.nu *; dist ffi x86_64-pc-windows-msvc"
+      - uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ipmb-ffi/*.zip
+            target/*.zip
+            target/*.pdb

@@ -25,7 +25,7 @@ export def test [...targets: string] {
     }
 }
 
-export def dist [...targets: string] {
+export def "build js" [...targets: string] {
     setup
     let version = (open Cargo.toml | get workspace | get package | get version)
     let pwd = ($env.PWD)
@@ -34,7 +34,6 @@ export def dist [...targets: string] {
         rustup target add $target;
 
         # Build
-        cargo build -p ipmb-ffi --target $target --release
         (napi build 
             -p ipmb-js 
             --cargo-cwd ipmb-js 
@@ -48,7 +47,43 @@ export def dist [...targets: string] {
 
         # Pack symbols
         cd $"target/($target)/release/";
-        for name in [ipmb-ffi ipmb-js] {
+        for name in [ipmb-js] {
+            let sym = (if ($target | str contains "darwin") {
+                let sym = $"lib($name).dylib.dSYM"
+                pack $"($sym)-v($version)-($target).zip" $"($sym)" 
+                $"($sym)-v($version)-($target).zip"
+            } else {
+                cp $"($name | str replace - _).pdb" $"($name | str replace - _)-v($version)-($target).pdb"
+                $"($name | str replace - _)-v($version)-($target).pdb"
+            })
+            mv $sym ../../
+        }
+        cd $pwd;
+    }
+}
+
+export def "dist js" [] {
+    cd ipmb-js
+
+    $"//registry.npmjs.org/:_authToken=($env.NPM_TOKEN)" | save .npmrc -f
+    npm publish --dry-run
+
+    cd ..
+}
+
+export def "build ffi" [...targets: string] {
+    let version = (open Cargo.toml | get workspace | get package | get version)
+    let pwd = ($env.PWD)
+
+    for target in $targets {
+        rustup target add $target;
+
+        # Build
+        cargo build -p ipmb-ffi --target $target --release
+
+        # Pack symbols
+        cd $"target/($target)/release/";
+        for name in [ipmb-ffi] {
             let sym = (if ($target | str contains "darwin") {
                 let sym = $"lib($name).dylib.dSYM"
                 pack $"($sym)-v($version)-($target).zip" $"($sym)" 
@@ -77,15 +112,6 @@ export def dist [...targets: string] {
         }
         cd $pwd
     }
-}
-
-export def "publish js" [] {
-    cd ipmb-js
-
-    $"//registry.npmjs.org/:_authToken=($env.NPM_TOKEN)" | save .npmrc -f
-    npm publish
-
-    cd ..
 }
 
 export def "demo cc" [] {
