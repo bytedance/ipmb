@@ -1,10 +1,9 @@
-# ipmb-js
+## ipmb-js
+
+The `ipmb-js` package is Node.js binding for [ipmb](https://github.com/bytedance/ipmb), 
+an interprocess message bus system built in Rust.
 
 ## Usage
-
-```shell
-npm i ipmb-js
-```
 
 ```js
 const { join, LabelOp, SelectorMode } = require('ipmb-js');
@@ -29,6 +28,14 @@ let { sender, receiver } = join({
     }
 })()
 
-sender.send({ label: new LabelOp("moon"), mode: SelectorMode.Unicast, ttl: 0 }, { format: 0, data: Buffer.alloc(8) }, []);
+let selector = { 
+    label: new LabelOp("moon"), 
+    mode: SelectorMode.Unicast, 
+    ttl: 0 
+};
+    
+let bytesMessage = { format: 0, data: Buffer.alloc(8) };
+
+sender.send(selector, bytesMessage, []);
 
 ```

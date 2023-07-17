@@ -2,6 +2,11 @@
   "name": "ipmb-js",
   "version": "0.7.3",
   "description": "ipmb-js",
+  "keywords": [
+    "ipmb",
+    "ipc",
+    "message-bus"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/bytedance/ipmb"
