@@ -1,10 +1,10 @@
 #!/usr/bin/env nu
 
-def setup [] {
+export def setup [] {
     npm i -g @napi-rs/cli@2.14.8
 }
 
-def pack [archive: string, ...files: string] {
+export def pack [archive: string, ...files: string] {
     if (sys | get host | get name) == "Windows" {
         let command = $"Compress-Archive -Path ($files | flatten | str join ', ') -DestinationPath ($archive)"
 
@@ -18,30 +18,30 @@ def pack [archive: string, ...files: string] {
     }
 }
 
-def test [...targets: string] {
+export def test [...targets: string] {
     for target in $targets {
         rustup target add $target;
         cargo run --target $target --example reliability
     }
 }
 
-def "publish js" [] {
+export def "publish js" [] {
 
 }
 
-def "demo cc" [] {
+export def "demo cc" [] {
     cmake .
     make cc_client
 	./target/debug/cc_client
 }
 
-def "demo cc plus" [] {
+export def "demo cc plus" [] {
     cmake .
     make cc_client_plus
 	./target/debug/cc_client_plus
 }
 
-def "demo js" [] {
+export def "demo js" [] {
     (napi build
 		-p ipmb-js
 		--cargo-cwd ipmb-js

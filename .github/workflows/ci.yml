@@ -12,10 +12,6 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
-defaults:
-  run:
-    shell: nu {0}
-
 jobs:
   test:
     runs-on: ${{ matrix.os }}
@@ -27,11 +23,14 @@ jobs:
       - uses: hustcer/setup-nu@v3
         with:
           version: '0.80'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
       - if: "matrix.os == 'macos-latest'"
         run: |
-          source action.nu
-          test x86_64-apple-darwin
+          nu -n -c "use action.nu *; test x86_64-apple-darwin"
       - if: "matrix.os == 'windows-latest'"
         run: |
-          source action.nu
-          test x86_64-pc-windows-msvc
+          nu -n -c "use action.nu *; test x86_64-pc-windows-msvc"
