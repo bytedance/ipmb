@@ -47,6 +47,11 @@ impl LabelOp {
     pub fn or(&mut self, right: &LabelOp) {
         self.0 = self.0.clone().or(right.0.clone());
     }
+
+    #[napi]
+    pub fn to_string(&self) -> String {
+        format!("{:?}", self.0)
+    }
 }
 
 #[napi(object)]

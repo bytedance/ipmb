@@ -28,6 +28,7 @@ export class LabelOp {
   not(): void
   and(right: LabelOp): void
   or(right: LabelOp): void
+  toString(): string
 }
 export class MemoryRegion {
   map(offset: number, size: number): Buffer
