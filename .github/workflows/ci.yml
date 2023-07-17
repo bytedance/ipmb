@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+    tags:
+      - '*'
+  pull_request:
+    branches: [ main ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+defaults:
+  run:
+    shell: nu {0}
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ macos-latest, windows-latest ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hustcer/setup-nu@v3
+        with:
+          version: '0.80'
+      - if: "matrix.os == 'macos-latest'"
+        run: |
+          source action.nu
+          test x86_64-apple-darwin
+      - if: "matrix.os == 'windows-latest'"
+        run: |
+          source action.nu
+          test x86_64-pc-windows-msvc
