@@ -36,7 +36,6 @@ export class Sender {
   send(selector: Selector, bytesMessage: BytesMessage, buffers: Array<Buffer>): void
 }
 export class Receiver {
-  tryRecv(): { bytesMessage: BytesMessage, memoryRegions: Array<MemoryRegion> } | undefined
   recv(timeout?: number | undefined | null): Promise<{ bytesMessage: BytesMessage, memoryRegions: Array<MemoryRegion> }>
   close(): void
 }
