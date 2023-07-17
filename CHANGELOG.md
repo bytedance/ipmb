@@ -2,9 +2,12 @@
 
 ## Unreleased
 
+## v0.7.3
+
 ### Changes
 
 - `ipmb.h`: Add enum value to Error.
+- `ipmb-js`: Refactor thread model.
 
 ### Features
 
@@ -15,6 +18,8 @@
 ipmb::Version version;
 std::cout << +version.major << "." << +version.minor << "." << +version.patch << "-" << version.pre << "\n";
 ```
+
+- `ipmb-js`: Add `LabelOp.toString` method.
 
 ## v0.7.1
 
