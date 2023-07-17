@@ -43,7 +43,8 @@ export def dist [...targets: string] {
             --target $target 
             --release
         )
-	    mv ipmb_js.node $"target/($target)/release/"
+        mkdir $"ipmb-js/($target)/release/"
+	    mv ipmb_js.node $"ipmb-js/($target)/release/"
 
         # Pack symbols
         cd $"target/($target)/release/";

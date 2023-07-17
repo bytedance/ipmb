@@ -1,5 +1,3 @@
-## ipmb-js
-
 The `ipmb-js` package is Node.js binding for [ipmb](https://github.com/bytedance/ipmb), 
 an interprocess message bus system built in Rust.
 
