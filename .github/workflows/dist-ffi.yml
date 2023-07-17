@@ -25,10 +25,10 @@ jobs:
           key: ${{ matrix.target }}
       - if: "matrix.os == 'macos-latest'"
         run: |
-          nu -n -c "use action.nu *; dist ffi aarch64-apple-darwin x86_64-apple-darwin"
+          nu -n -c "use action.nu *; build ffi aarch64-apple-darwin x86_64-apple-darwin"
       - if: "matrix.os == 'windows-latest'"
         run: |
-          nu -n -c "use action.nu *; dist ffi x86_64-pc-windows-msvc"
+          nu -n -c "use action.nu *; build ffi x86_64-pc-windows-msvc"
       - uses: softprops/action-gh-release@v1
         with:
           files: |
