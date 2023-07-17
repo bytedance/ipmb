@@ -61,6 +61,7 @@ jobs:
           nu -n -c "use action.nu *; dist x86_64-pc-windows-msvc"
       - uses: actions/upload-artifact@v3
         with:
+          name: ipmb-js
           path: |
             ipmb-js/*/release/ipmb_js.node
       - uses: softprops/action-gh-release@v1
@@ -83,6 +84,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/download-artifact@v3
+        with:
+          name: ipmb-js
+          path: |
+            ipmb-js
       - run: |
           nu -n -c "use action.nu *; publish js"
         env:

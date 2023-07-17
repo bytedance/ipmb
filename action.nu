@@ -83,7 +83,7 @@ export def "publish js" [] {
     cd ipmb-js
 
     $"//registry.npmjs.org/:_authToken=($env.NPM_TOKEN)" | save .npmrc -f
-    npm publish --dry-run
+    npm publish
 
     cd ..
 }
