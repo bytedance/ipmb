@@ -25,6 +25,58 @@ export def test [...targets: string] {
     }
 }
 
+export def dist [...targets: string] {
+    setup
+    let version = (open Cargo.toml | get workspace | get package | get version)
+    let pwd = ($env.PWD)
+
+    for target in $targets {
+        rustup target add $target;
+
+        # Build
+        cargo build -p ipmb-ffi --target $target --release
+        (napi build 
+            -p ipmb-js 
+            --cargo-cwd ipmb-js 
+            -c ipmb-js/package.json
+            --dts ipmb-js/index.d.ts 
+            --target $target 
+            --release
+        )
+	    mv ipmb_js.node $"target/($target)/release/"
+
+        # Pack symbols
+        cd $"target/($target)/release/";
+        for name in [ipmb-ffi ipmb-js] {
+            let sym = (if ($target | str contains "darwin") {
+                let sym = $"lib($name).dylib.dSYM"
+                pack $"($sym)-v($version)-($target).zip" $"($sym)" 
+                $"($sym)-v($version)-($target).zip"
+            } else {
+                cp $"($name | str replace - _).pdb" $"($name | str replace - _)-v($version)-($target).pdb"
+                $"($name | str replace - _)-v($version)-($target).pdb"
+            })
+        }
+        cd $pwd;
+
+        # Pack artifacts
+        let dy = (if ($target | str contains "darwin") {
+            [libipmb_ffi.dylib]
+        } else {
+            [ipmb_ffi.dll ipmb_ffi.dll.lib]
+        })
+        for name in $dy {
+            cp $"target/($target)/release/($name)" ipmb-ffi/
+        }
+        cd ipmb-ffi
+        pack $"ipmb-ffi-($target).zip" include/ ipmb.cc $dy 
+        for name in $dy {
+            rm $name 
+        }
+        cd $pwd
+    }
+}
+
 export def "publish js" [] {
 
 }
