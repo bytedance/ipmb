@@ -61,3 +61,5 @@ jobs:
         with:
           files: |
             ipmb-ffi/*.zip
+            target/*.zip
+            target/*.pdb

@@ -56,6 +56,7 @@ export def dist [...targets: string] {
                 cp $"($name | str replace - _).pdb" $"($name | str replace - _)-v($version)-($target).pdb"
                 $"($name | str replace - _)-v($version)-($target).pdb"
             })
+            mv $sym ../../
         }
         cd $pwd;
 
@@ -69,7 +70,7 @@ export def dist [...targets: string] {
             cp $"target/($target)/release/($name)" ipmb-ffi/
         }
         cd ipmb-ffi
-        pack $"ipmb-ffi-($target).zip" include/ ipmb.cc $dy 
+        pack $"ipmb-ffi-v($version)-($target).zip" include/ ipmb.cc $dy 
         for name in $dy {
             rm $name 
         }
