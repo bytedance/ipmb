@@ -8,6 +8,9 @@ An interprocess message bus system built in Rust, which can be used to pass mess
    </tr>
 </table>
 
+[![Crates.io](https://img.shields.io/crates/v/ipmb.svg?label=ipmb)](https://crates.io/crates/ipmb)
+[![npm version](https://img.shields.io/npm/v/ipmb-js.svg?label=ipmb-js)](https://www.npmjs.com/package/ipmb-js)
+
 ## Goals
 
 - **Easy to use**: `join`, `send`, `recv`, that's everything
