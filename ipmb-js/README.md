@@ -3,14 +3,14 @@
 ## Usage
 
 ```shell
-npm i [@<scope>/]ipmb-js
+npm i ipmb-js
 ```
 
 ```js
-const { join, SelectorMode } = require('[@<scope>/]ipmb-js');
+const { join, LabelOp, SelectorMode } = require('ipmb-js');
 
 let { sender, receiver } = join({
-    identifier: 'solar.com',
+    identifier: 'com.solar',
     label: ['earth'],
     token: '',
     controllerAffinity: true,
@@ -29,6 +29,6 @@ let { sender, receiver } = join({
     }
 })()
 
-sender.send({ label: ["moon"], mode: SelectorMode.Unicast, ttl: 0 }, { format: 0, data: Buffer.alloc(8) }, []);
+sender.send({ label: new LabelOp("moon"), mode: SelectorMode.Unicast, ttl: 0 }, { format: 0, data: Buffer.alloc(8) }, []);
 
 ```

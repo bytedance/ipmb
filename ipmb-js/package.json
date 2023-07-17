@@ -2,10 +2,15 @@
   "name": "ipmb-js",
   "version": "0.7.3",
   "description": "ipmb-js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bytedance/ipmb"
+  },
   "main": "index.js",
   "types": "index.d.ts",
   "author": "ipmb developers",
   "private": false,
+  "license": "Apache-2.0 OR MIT",
   "files": [
     "index.d.ts",
     "aarch64-apple-darwin/release/ipmb_js.node",
