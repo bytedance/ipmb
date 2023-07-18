@@ -26,6 +26,8 @@ jobs:
       - if: "matrix.os == 'macos-latest'"
         run: |
           nu -n -c "use action.nu *; build js aarch64-apple-darwin x86_64-apple-darwin"
+        env:
+          MACOSX_DEPLOYMENT_TARGET: 10.11
       - if: "matrix.os == 'windows-latest'"
         run: |
           nu -n -c "use action.nu *; build js x86_64-pc-windows-msvc"
