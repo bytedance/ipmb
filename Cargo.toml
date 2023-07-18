@@ -8,7 +8,6 @@ members = [
 ]
 
 [workspace.package]
-version = "0.7.3"
 rust-version = "1.65"
 
 [workspace.dependencies.ipmb]

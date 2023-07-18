@@ -27,7 +27,7 @@ export def test [...targets: string] {
 
 export def "build js" [...targets: string] {
     setup
-    let version = (open Cargo.toml | get workspace | get package | get version)
+    let version = (open ipmb-js/Cargo.toml).package.version
     let pwd = ($env.PWD)
 
     for target in $targets {
@@ -72,7 +72,7 @@ export def "dist js" [] {
 }
 
 export def "build ffi" [...targets: string] {
-    let version = (open Cargo.toml | get workspace | get package | get version)
+    let version = (open ipmb-ffi/Cargo.toml).package.version
     let pwd = ($env.PWD)
 
     for target in $targets {
