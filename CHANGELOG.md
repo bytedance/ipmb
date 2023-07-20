@@ -41,7 +41,6 @@ std::cout << +version.major << "." << +version.minor << "." << +version.patch <<
 - Add `MemoryRegion::ref_count` for getting cross-process reference count.
 - `ipmb.h`: Implement copy constructor for `MemoryRegion`.
 - Add `MemoryRegistry::allc_with_free`, free function will be called when region became free.
-- `ipmb.h`: Add `Message::object_retrieve`.
 
 ```rust
 fn main() {
@@ -54,6 +53,7 @@ fn main() {
 }
 ```
 
+- `ipmb.h`: Add `Message::object_retrieve`.
 - Add `tag` to `MemoryRegistry::alloc/alloc_with_free`.
 
 ```rust
