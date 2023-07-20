@@ -73,7 +73,7 @@ On macOS, it will be used to register the MachPort service, and on Windows, it w
 
 ### Label
 
-Label is the description of an endpoint, and a message can be routed to an endpoint with a specific label.
+Label is the description of an endpoint, and a message can be routed to an endpoint with a `LabelOp`.
 A label can contain multiple elements, such as `label!("renderer", "codec")`.
 
 ### Selector
