@@ -324,6 +324,17 @@ impl ThreadsafeFunction {
     }
 }
 
+impl Drop for ThreadsafeFunction {
+    fn drop(&mut self) {
+        unsafe {
+            sys::napi_release_threadsafe_function(
+                self.0,
+                sys::ThreadsafeFunctionReleaseMode::release,
+            );
+        }
+    }
+}
+
 unsafe impl Send for ThreadsafeFunction {}
 
 unsafe impl Sync for ThreadsafeFunction {}
