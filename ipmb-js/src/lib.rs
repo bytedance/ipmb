@@ -466,3 +466,50 @@ fn consume_deferred(
         }
     }
 }
+
+#[allow(dead_code)]
+fn execute_with_env(env: Env, f: impl FnOnce(Env)) {
+    let f: Box<dyn FnOnce(Env)> = Box::new(f);
+
+    unsafe {
+        let name = "execute_with_env";
+        let mut async_resource_name = ptr::null_mut();
+        let mut r = sys::napi_create_string_utf8(
+            env.raw(),
+            name.as_ptr() as _,
+            name.len(),
+            &mut async_resource_name,
+        );
+        assert_eq!(r, sys::Status::napi_ok);
+
+        let mut async_work = ptr::null_mut();
+        r = sys::napi_create_async_work(
+            env.raw(),
+            ptr::null_mut(),
+            async_resource_name,
+            Some(execute),
+            Some(complete),
+            Box::into_raw(Box::new(Some(f))) as _,
+            &mut async_work,
+        );
+        assert_eq!(r, sys::Status::napi_ok);
+
+        r = sys::napi_queue_async_work(env.raw(), async_work);
+        assert_eq!(r, sys::Status::napi_ok);
+    }
+}
+
+extern "C" fn execute(env: sys::napi_env, data: *mut ffi::c_void) {
+    let f = data as *mut Option<Box<dyn FnOnce(Env)>>;
+    unsafe {
+        let f = &mut *f;
+        (f.take().unwrap())(Env::from_raw(env));
+    }
+}
+
+extern "C" fn complete(_env: sys::napi_env, _status: sys::napi_status, data: *mut ffi::c_void) {
+    let f = data as *mut Option<Box<dyn FnOnce(Env)>>;
+    unsafe {
+        let _ = *Box::from_raw(f);
+    }
+}
