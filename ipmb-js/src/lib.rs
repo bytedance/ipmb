@@ -35,7 +35,7 @@ impl LabelOp {
 
     #[napi]
     pub fn not(&mut self) {
-        self.0 = self.0.clone().not();
+        self.0 = !self.0.clone();
     }
 
     #[napi]

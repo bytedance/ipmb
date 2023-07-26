@@ -451,7 +451,7 @@ pub unsafe extern "C" fn ipmb_label_op_drop(left: LabelOp) {}
 #[no_mangle]
 pub unsafe extern "C" fn ipmb_label_op_not(left: LabelOp) -> LabelOp {
     let left: ipmb::LabelOp = left.into();
-    left.not().into()
+    (!left).into()
 }
 
 #[no_mangle]

@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
 use smol_str::SmolStr;
 use std::iter;
+use std::ops::Not;
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Label(SmallVec<[SmolStr; 8]>);
@@ -64,7 +65,7 @@ macro_rules! label {
 
 /// Route matching operations, e.g.
 /// ```rust
-/// ipmb::LabelOp::from("foo").and("bar").or(ipmb::LabelOp::from("baz").not());
+/// ipmb::LabelOp::from("foo").and("bar").or(!ipmb::LabelOp::from("baz"));
 /// ```
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum LabelOp {
@@ -77,10 +78,6 @@ pub enum LabelOp {
 }
 
 impl LabelOp {
-    pub fn not(self) -> Self {
-        Self::Not(Box::new(self))
-    }
-
     pub fn and(self, v: impl Into<Self>) -> Self {
         Self::And(Box::new(self), Box::new(v.into()))
     }
@@ -98,6 +95,14 @@ impl LabelOp {
             Self::Or(left, right) => left.validate(label) || right.validate(label),
             Self::Not(left) => !left.validate(label),
         }
+    }
+}
+
+impl Not for LabelOp {
+    type Output = Self;
+
+    fn not(self) -> Self::Output {
+        Self::Not(Box::new(self))
     }
 }
 
@@ -149,7 +154,7 @@ mod test {
 
     #[test]
     fn op_not() {
-        let op = LabelOp::from("foo").not();
+        let op = !LabelOp::from("foo");
         assert!(op.validate(&label!("bar", "baz")));
     }
 
