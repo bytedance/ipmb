@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- Implement `Not` for `LabelOp`.
+
+## ipmb-js@v0.7.6
+
+### Features
+- Add `Object`, `value` method to get `MachPort`/`HANDLE`.
+
+### Fixes
+
+- Implement `Drop` for `ThreadsafeFunction`.
+
 ## v0.7.3
 
 ### Changes
