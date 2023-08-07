@@ -14,6 +14,11 @@ console.log("Join succeed.");
         let msg = await receiver.recv(null);
         console.log(msg.bytesMessage);
 
+        let obj = msg.objects[0];
+        if (obj) {
+            console.log("object", obj.value());
+        }
+
         let region = msg.memoryRegions[0];
         if (region) {
             console.log(region.map(0, -1));

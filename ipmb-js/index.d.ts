@@ -30,6 +30,9 @@ export class LabelOp {
   or(right: LabelOp): void
   toString(): string
 }
+export class Object {
+  value(): number
+}
 export class MemoryRegion {
   map(offset: number, size: number): Buffer
 }
@@ -37,6 +40,6 @@ export class Sender {
   send(selector: Selector, bytesMessage: BytesMessage, buffers: Array<Buffer>): void
 }
 export class Receiver {
-  recv(timeout?: number | undefined | null): Promise<{ bytesMessage: BytesMessage, memoryRegions: Array<MemoryRegion> }>
+  recv(timeout?: number | undefined | null): Promise<{ bytesMessage: BytesMessage, objects: Array<Object>, memoryRegions: Array<MemoryRegion> }>
   close(): void
 }

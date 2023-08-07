@@ -87,6 +87,17 @@ pub struct BytesMessage {
 }
 
 #[napi]
+pub struct Object(ipmb::Object);
+
+#[napi]
+impl Object {
+    #[napi]
+    pub fn value(&self) -> i64 {
+        self.0.as_raw() as _
+    }
+}
+
+#[napi]
 pub struct MemoryRegion(ipmb::MemoryRegion);
 
 #[napi]
@@ -164,7 +175,7 @@ impl Drop for Receiver {
 #[napi]
 impl Receiver {
     #[napi(
-        ts_return_type = "Promise<{ bytesMessage: BytesMessage, memoryRegions: Array<MemoryRegion> }>"
+        ts_return_type = "Promise<{ bytesMessage: BytesMessage, objects: Array<Object>, memoryRegions: Array<MemoryRegion> }>"
     )]
     pub fn recv(&mut self, timeout: Option<u32>, env: Env) -> Result<napi::JsObject> {
         let mut local = self.local_buffer.lock().unwrap();
@@ -451,6 +462,7 @@ fn consume_deferred(
                 format: message.payload.format,
                 data: message.payload.data.into(),
             };
+            let js_objects: Vec<Object> = message.objects.into_iter().map(Object).collect();
             let js_regions: Vec<MemoryRegion> = message
                 .memory_regions
                 .into_iter()
@@ -459,6 +471,7 @@ fn consume_deferred(
 
             let mut js_obj = env.create_object().unwrap();
             js_obj.set("bytesMessage", bytes_message).unwrap();
+            js_obj.set("objects", js_objects).unwrap();
             js_obj.set("memoryRegions", js_regions).unwrap();
 
             let r = unsafe { sys::napi_resolve_deferred(env.raw(), deferred, js_obj.raw()) };
