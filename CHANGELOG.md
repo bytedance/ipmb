@@ -4,6 +4,12 @@
 
 - Implement `Not` for `LabelOp`.
 
+## ipmb-js@v0.7.7
+
+### Fixes
+
+- Ref threadsafe function to prevent crashes on process exit.
+
 ## ipmb-js@v0.7.6
 
 ### Features
