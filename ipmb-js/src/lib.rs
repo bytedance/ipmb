@@ -266,6 +266,10 @@ pub fn join(options: Options, timeout: Option<u32>, env: Env) -> Result<napi::Js
             &mut tsfn,
         );
         assert_eq!(r, sys::Status::napi_ok);
+
+        r = sys::napi_ref_threadsafe_function(env.raw(), tsfn);
+        assert_eq!(r, sys::Status::napi_ok);
+
         ThreadsafeFunction(tsfn)
     };
 
@@ -275,7 +279,7 @@ pub fn join(options: Options, timeout: Option<u32>, env: Env) -> Result<napi::Js
         match r {
             Err(ipmb::RecvError::Timeout) => match guard_receiver.try_recv() {
                 Ok(_) => {
-                    tsfn.call(DelegateAction::Close);
+                    tsfn.destroy();
                     break;
                 }
                 Err(mpsc::TryRecvError::Disconnected) => {
@@ -287,7 +291,7 @@ pub fn join(options: Options, timeout: Option<u32>, env: Env) -> Result<napi::Js
             },
             Err(ipmb::RecvError::VersionMismatch(_) | ipmb::RecvError::TokenMismatch) => {
                 tsfn.call(DelegateAction::Recv(r));
-                tsfn.call(DelegateAction::Close);
+                tsfn.destroy();
                 break;
             }
             _ => {
@@ -329,6 +333,16 @@ impl ThreadsafeFunction {
             sys::napi_call_threadsafe_function(
                 self.0,
                 Box::into_raw(Box::new(action)) as _,
+                sys::ThreadsafeFunctionCallMode::blocking,
+            );
+        }
+    }
+
+    fn destroy(self) {
+        unsafe {
+            sys::napi_call_threadsafe_function(
+                self.0,
+                Box::into_raw(Box::new(DelegateAction::Close(self))) as _,
                 sys::ThreadsafeFunctionCallMode::blocking,
             );
         }
@@ -390,7 +404,7 @@ impl LocalBuffer {
         }
     }
 
-    fn close(&mut self, env: Env) {
+    fn close(&mut self, env: Env, tsfn: ThreadsafeFunction) {
         self.closed = true;
         let deferred_list = mem::take(&mut self.deferred_list);
 
@@ -404,12 +418,16 @@ impl LocalBuffer {
                 );
             }
         }
+
+        unsafe {
+            sys::napi_unref_threadsafe_function(env.raw(), tsfn.0);
+        }
     }
 }
 
 enum DelegateAction {
     CleanTimeout,
-    Close,
+    Close(ThreadsafeFunction),
     Recv(std::result::Result<ipmb::Message<ipmb::BytesMessage>, ipmb::RecvError>),
 }
 
@@ -427,7 +445,7 @@ extern "C" fn delegate_receiver(
         debug_assert!(local.deferred_list.is_empty() || local.messages.is_empty());
 
         match action {
-            DelegateAction::Close => local.close(env),
+            DelegateAction::Close(tsfn) => local.close(env, tsfn),
             DelegateAction::CleanTimeout => local.clean_timeout(env),
             DelegateAction::Recv(r) => {
                 if local.deferred_list.is_empty() {
