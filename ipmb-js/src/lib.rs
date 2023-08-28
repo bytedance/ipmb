@@ -161,6 +161,7 @@ impl Sender {
 }
 
 #[napi]
+#[derive(Clone)]
 pub struct Receiver {
     guard_sender: mpsc::SyncSender<()>,
     local_buffer: Arc<Mutex<LocalBuffer>>,
@@ -224,7 +225,7 @@ impl Receiver {
 }
 
 #[napi(ts_return_type = "{ sender: Sender, receiver: Receiver }")]
-pub fn join(options: Options, timeout: Option<u32>, env: Env) -> Result<napi::JsObject> {
+pub fn join(options: Options, timeout: Option<u32>, mut env: Env) -> Result<napi::JsObject> {
     let (sender, mut receiver) = ipmb::join::<ipmb::BytesMessage, ipmb::BytesMessage>(
         ipmb::Options {
             identifier: options.identifier,
@@ -300,6 +301,13 @@ pub fn join(options: Options, timeout: Option<u32>, env: Env) -> Result<napi::Js
         }
     });
 
+    let receiver = Receiver {
+        local_buffer,
+        guard_sender,
+    };
+
+    let _ = env.add_env_cleanup_hook(receiver.clone(), |_| {})?;
+
     let mut js_obj = env.create_object()?;
     js_obj.set(
         "sender",
@@ -308,13 +316,7 @@ pub fn join(options: Options, timeout: Option<u32>, env: Env) -> Result<napi::Js
             memory_registry: ipmb::MemoryRegistry::default(),
         },
     )?;
-    js_obj.set(
-        "receiver",
-        Receiver {
-            local_buffer,
-            guard_sender,
-        },
-    )?;
+    js_obj.set("receiver", receiver)?;
 
     Ok(js_obj)
 }
@@ -387,16 +389,11 @@ impl LocalBuffer {
 
             if deadline < now {
                 let (deferred, _) = self.deferred_list.remove(i);
-                unsafe {
-                    sys::napi_reject_deferred(
-                        env.raw(),
-                        deferred.0,
-                        Error::to_napi_value(
-                            env.raw(),
-                            Error::new(Status::GenericFailure, "timeout"),
-                        )
-                        .unwrap(),
-                    );
+
+                if let Ok(err) = env.create_error(Error::new(Status::GenericFailure, "timeout")) {
+                    unsafe {
+                        sys::napi_reject_deferred(env.raw(), deferred.0, err.raw());
+                    }
                 }
             } else {
                 i += 1;
@@ -408,14 +405,11 @@ impl LocalBuffer {
         self.closed = true;
         let deferred_list = mem::take(&mut self.deferred_list);
 
-        for (deferred, _) in deferred_list {
-            unsafe {
-                sys::napi_reject_deferred(
-                    env.raw(),
-                    deferred.0,
-                    Error::to_napi_value(env.raw(), Error::new(Status::GenericFailure, "closed"))
-                        .unwrap(),
-                );
+        if let Ok(err) = env.create_error(Error::new(Status::GenericFailure, "closed")) {
+            for (deferred, _) in deferred_list {
+                unsafe {
+                    sys::napi_reject_deferred(env.raw(), deferred.0, err.raw());
+                }
             }
         }
 
@@ -496,15 +490,11 @@ fn consume_deferred(
             assert_eq!(r, sys::Status::napi_ok);
         }
         Err(err) => {
-            let r = unsafe {
-                sys::napi_reject_deferred(
-                    env.raw(),
-                    deferred,
-                    Error::to_napi_value(env.raw(), Error::new(Status::GenericFailure, err))
-                        .unwrap(),
-                )
-            };
-            assert_eq!(r, sys::Status::napi_ok);
+            if let Ok(err) = env.create_error(Error::new(Status::GenericFailure, err)) {
+                unsafe {
+                    sys::napi_reject_deferred(env.raw(), deferred, err.raw());
+                };
+            }
         }
     }
 }
