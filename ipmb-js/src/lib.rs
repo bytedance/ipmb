@@ -194,7 +194,7 @@ impl Receiver {
 
             if !local.messages.is_empty() {
                 let r = local.messages.remove(0);
-                consume_deferred(env, deferred, r);
+                let _ = consume_deferred(env, deferred, r);
             } else {
                 local.deferred_list.push((
                     Deferred(deferred),
@@ -446,7 +446,7 @@ extern "C" fn delegate_receiver(
                     local.messages.push(r);
                 } else {
                     let (deferred, _) = local.deferred_list.remove(0);
-                    consume_deferred(env, deferred.0, r);
+                    let _ = consume_deferred(env, deferred.0, r);
                 }
             }
         }
@@ -467,7 +467,7 @@ fn consume_deferred(
     env: Env,
     deferred: sys::napi_deferred,
     r: std::result::Result<ipmb::Message<ipmb::BytesMessage>, ipmb::RecvError>,
-) {
+) -> Result<()> {
     match r {
         Ok(message) => {
             let bytes_message = BytesMessage {
@@ -481,19 +481,25 @@ fn consume_deferred(
                 .map(MemoryRegion)
                 .collect();
 
-            let mut js_obj = env.create_object().unwrap();
-            js_obj.set("bytesMessage", bytes_message).unwrap();
-            js_obj.set("objects", js_objects).unwrap();
-            js_obj.set("memoryRegions", js_regions).unwrap();
+            let mut js_obj = env.create_object()?;
+            js_obj.set("bytesMessage", bytes_message)?;
+            js_obj.set("objects", js_objects)?;
+            js_obj.set("memoryRegions", js_regions)?;
 
             let r = unsafe { sys::napi_resolve_deferred(env.raw(), deferred, js_obj.raw()) };
-            assert_eq!(r, sys::Status::napi_ok);
+            if r == sys::Status::napi_ok {
+                Ok(())
+            } else {
+                Err(Error::new(Status::GenericFailure, "napi_resolve_deferred"))
+            }
         }
         Err(err) => {
-            if let Ok(err) = env.create_error(Error::new(Status::GenericFailure, err)) {
-                unsafe {
-                    sys::napi_reject_deferred(env.raw(), deferred, err.raw());
-                };
+            let err = env.create_error(Error::new(Status::GenericFailure, err))?;
+            let r = unsafe { sys::napi_reject_deferred(env.raw(), deferred, err.raw()) };
+            if r == sys::Status::napi_ok {
+                Ok(())
+            } else {
+                Err(Error::new(Status::GenericFailure, "napi_reject_deferred"))
             }
         }
     }
