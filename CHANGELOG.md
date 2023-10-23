@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## ipmb-js@v0.7.9
+
+### Fixes
+
+- `ipmb-js`: Fix panic when env shutting down.
+
+## ipmb-js@v0.7.8
+
+### Features
+
 - Implement `Not` for `LabelOp`.
 
 ## ipmb-js@v0.7.7
