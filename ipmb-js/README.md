@@ -27,7 +27,7 @@ let { sender, receiver } = join({
 })()
 
 let selector = { 
-    label: new LabelOp("moon"), 
+    labelOp: new LabelOp("moon"), 
     mode: SelectorMode.Unicast, 
     ttl: 0 
 };
