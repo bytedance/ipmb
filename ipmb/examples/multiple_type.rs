@@ -6,7 +6,7 @@ use type_uuid::TypeUuid;
 
 fn main() {
     let (sender, _) = ipmb::join::<MultipleMessage, MultipleMessage>(
-        ipmb::Options::new("solar.com", label!("single-type"), ""),
+        ipmb::Options::new("com.solar", label!("single-type"), ""),
         None,
     )
     .unwrap();

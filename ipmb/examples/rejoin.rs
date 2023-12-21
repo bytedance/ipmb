@@ -7,7 +7,7 @@ fn main() {
     builder.parse_default_env();
     builder.init();
 
-    let option = ipmb::Options::new("solar.com", label!("moon"), "");
+    let option = ipmb::Options::new("com.solar", label!("moon"), "");
 
     {
         let (_sender, _receiver) =

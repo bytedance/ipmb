@@ -9,7 +9,7 @@ int main()
     ipmb_ffi::ipmb_label_insert(&label, "cc");
 
     ipmb_ffi::Options options;
-    options.identifier = "solar.com";
+    options.identifier = "com.solar";
     options.label = &label;
     options.token = "";
     options.controller_affinity = true;

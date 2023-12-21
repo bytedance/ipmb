@@ -11,7 +11,7 @@ fn main() {
     let current = if is_main { "sun" } else { "moon" };
 
     let (tx, mut rx) =
-        ipmb::join::<(), ()>(ipmb::Options::new("solar.com", label!(current), ""), None).unwrap();
+        ipmb::join::<(), ()>(ipmb::Options::new("com.solar", label!(current), ""), None).unwrap();
 
     if is_main {
         let mut child = Command::new(command).arg("moon").spawn().unwrap();

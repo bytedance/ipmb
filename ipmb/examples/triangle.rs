@@ -18,7 +18,7 @@ fn main() {
         _ => ipmb::LabelOp::from("b").or("c"),
     };
 
-    let mut options = ipmb::Options::new("solar.com", label!(label), "");
+    let mut options = ipmb::Options::new("com.solar", label!(label), "");
     options.controller_affinity = true;
 
     let (sender, mut receiver) =

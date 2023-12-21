@@ -8,7 +8,7 @@ int main() {
     std::cout << +version.major << "." << +version.minor << "." << +version.patch << "-" << version.pre << "\n";
 
     ipmb::Options options(
-            "solar.com",
+            "com.solar",
             ipmb::Label {"cc"},
             "",
             true

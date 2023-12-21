@@ -1,7 +1,7 @@
 const { join, SelectorMode, LabelOp } = require('../../target/debug/ipmb_js.node');
 
 let { sender, receiver } = join({
-    identifier: "solar.com",
+    identifier: "com.solar",
     label: ["cc"],
     token: "",
     controllerAffinity: true,
