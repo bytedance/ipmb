@@ -522,15 +522,17 @@ unsafe fn init() {
         let mut r = mach_sys::task_get_special_port(
             mach_sys::mach_task_self(),
             mach_sys::TASK_BOOTSTRAP_PORT,
-            &mut BOOTSTRAP_PORT,
+            ptr::addr_of_mut!(BOOTSTRAP_PORT),
         );
         assert_eq!(r, mach_sys::BOOTSTRAP_SUCCESS);
         BOOTSTRAP_PORT_ROOT = BOOTSTRAP_PORT;
 
         let mut up = 0;
         loop {
-            r = mach_sys::bootstrap_parent(BOOTSTRAP_PORT_ROOT, &mut up);
-            assert_eq!(r, mach_sys::BOOTSTRAP_SUCCESS);
+            r = mach_sys::bootstrap_parent(BOOTSTRAP_PORT_ROOT, ptr::addr_of_mut!(up));
+            if r != mach_sys::BOOTSTRAP_SUCCESS {
+                break;
+            }
             if BOOTSTRAP_PORT_ROOT == up {
                 break;
             }
