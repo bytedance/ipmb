@@ -374,7 +374,7 @@ pub unsafe extern "C" fn ipmb_memory_region_map(
     region: &mut MemoryRegion,
     offset: usize,
     size: isize,
-    real_size: &mut isize,
+    real_size: *mut isize,
 ) -> *mut u8 {
     if size < 0 {
         region.map(offset..)
@@ -382,7 +382,7 @@ pub unsafe extern "C" fn ipmb_memory_region_map(
         region.map(offset..offset + size as usize)
     }
     .map(|v| {
-        if !(real_size as *mut isize).is_null() {
+        if !real_size.is_null() {
             *real_size = v.len() as _;
         }
         v.as_mut_ptr()
