@@ -108,9 +108,11 @@ namespace ipmb {
 
         MemoryRegion(uintptr_t size);
 
+        /**
         MemoryRegion(const MemoryRegion& other);
 
         MemoryRegion& operator=(const MemoryRegion& other);
+        */
 
         MemoryRegion(MemoryRegion&& other) noexcept;
 
@@ -121,6 +123,8 @@ namespace ipmb {
         std::tuple<uint8_t*, intptr_t, Error> map(uintptr_t offset, intptr_t size);
 
         std::tuple<uint32_t, Error> ref_count();
+
+        MemoryRegion clone();
 
     private:
         ipmb_ffi::MemoryRegion raw_ = nullptr;

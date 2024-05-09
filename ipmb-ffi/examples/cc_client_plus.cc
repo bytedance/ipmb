@@ -5,7 +5,11 @@
 
 int main() {
     ipmb::Version version;
-    std::cout << +version.major << "." << +version.minor << "." << +version.patch << "-" << version.pre << "\n";
+    std::cout << +version.major << "." << +version.minor << "." << +version.patch;
+    if (!version.pre.empty()) {
+        std::cout << "-" << version.pre;
+    }
+    std::cout << "\n";
 
     ipmb::Options options(
             "com.solar",

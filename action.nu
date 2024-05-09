@@ -115,14 +115,16 @@ export def "build ffi" [...targets: string] {
 }
 
 export def "demo cc" [] {
+    cargo build -p ipmb-ffi
     cmake .
-    make cc_client
+    cmake --build . --target cc_client
 	./target/debug/cc_client
 }
 
 export def "demo cc plus" [] {
+    cargo build -p ipmb-ffi
     cmake .
-    make cc_client_plus
+    cmake --build . --target cc_client_plus
 	./target/debug/cc_client_plus
 }
 

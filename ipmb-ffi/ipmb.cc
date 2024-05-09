@@ -155,6 +155,7 @@ namespace ipmb {
         raw_ = ipmb_ffi::ipmb_memory_region(size);
     }
 
+    /**
     MemoryRegion::MemoryRegion(const MemoryRegion& other) {
         if (other.raw_) {
             raw_ = ipmb_ffi::ipmb_memory_region_clone(&other.raw_);
@@ -172,6 +173,14 @@ namespace ipmb {
         }
 
         return *this;
+    }
+    */
+
+    MemoryRegion MemoryRegion::clone() {
+        if (!raw_) {
+            return MemoryRegion();
+        }
+        return MemoryRegion(ipmb_ffi::ipmb_memory_region_clone(&raw_));
     }
 
     MemoryRegion::MemoryRegion(MemoryRegion&& other) noexcept {
