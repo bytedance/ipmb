@@ -183,6 +183,8 @@ namespace ipmb {
 
         std::tuple<ipmb_ffi::Object, Error> object_retrieve(uintptr_t index);
 
+        std::tuple<ipmb_ffi::Object, Error> object_get(uintptr_t index);
+
         void memory_region_append(MemoryRegion&& region);
 
         std::tuple<MemoryRegion, Error> memory_region_retrieve(uintptr_t index);

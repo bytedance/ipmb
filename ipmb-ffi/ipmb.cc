@@ -370,6 +370,19 @@ namespace ipmb {
         }
     }
 
+    std::tuple<ipmb_ffi::Object, Error> Message::object_get(uintptr_t index) {
+        if (!raw_) {
+            return std::make_tuple(0, Error::kUnknown);
+        }
+
+        auto obj = ipmb_ffi::ipmb_message_object_get(&raw_, index);
+        if (obj) {
+            return std::make_tuple(obj, Error::kSuccess);
+        } else {
+            return std::make_tuple(0, Error::kUnknown);
+        }
+    }
+
     void Message::memory_region_append(MemoryRegion&& region) {
         if (!raw_ || !region.raw_) {
             return;
