@@ -108,11 +108,9 @@ namespace ipmb {
 
         MemoryRegion(uintptr_t size);
 
-        /**
-        MemoryRegion(const MemoryRegion& other);
+        MemoryRegion(const MemoryRegion& other) = delete;
 
-        MemoryRegion& operator=(const MemoryRegion& other);
-        */
+        MemoryRegion& operator=(const MemoryRegion& other) = delete;
 
         MemoryRegion(MemoryRegion&& other) noexcept;
 
