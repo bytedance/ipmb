@@ -87,6 +87,7 @@ impl BusController {
                 }
 
                 self.detect_reachable(now);
+                self.maintain(now);
             })
             .expect("failed to spawn ipmb bus controller");
     }
@@ -229,6 +230,10 @@ impl BusController {
 
             self.last_detect_reachable = now;
         }
+    }
+
+    fn maintain(&mut self, now: Instant) {
+        self.message_buffer.retain(|(expire, _)| *expire > now);
     }
 }
 
