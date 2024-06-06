@@ -1,7 +1,10 @@
 use serde::{Deserialize, Serialize};
-use std::process::Command;
-use std::time::{Duration, SystemTime};
-use std::{env, thread};
+use std::{
+    env,
+    process::Command,
+    thread,
+    time::{Duration, SystemTime},
+};
 use type_uuid::TypeUuid;
 
 fn main() {

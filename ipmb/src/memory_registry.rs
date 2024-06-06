@@ -1,6 +1,8 @@
 use crate::MemoryRegion;
-use std::collections::BTreeMap;
-use std::time::{Duration, Instant};
+use std::{
+    collections::BTreeMap,
+    time::{Duration, Instant},
+};
 
 /// Perform memory region allocation by reusing system memory.
 #[derive(Default)]

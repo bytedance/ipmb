@@ -1,11 +1,13 @@
-use super::security::SecurityAttr;
-use super::{pipe, Handle, Remote};
-use crate::message::FetchProcessHandleMessage;
-use crate::{decode, EncodedMessage, Error, LabelOp, Message, Selector};
+use super::{pipe, security::SecurityAttr, Handle, Remote};
+use crate::{
+    decode, message::FetchProcessHandleMessage, EncodedMessage, Error, LabelOp, Message, Selector,
+};
 use std::os::windows::prelude::{FromRawHandle, OwnedHandle};
-use windows::Win32::Foundation;
-use windows::Win32::Storage::FileSystem;
-use windows::Win32::System::{Pipes, Threading, IO};
+use windows::Win32::{
+    Foundation,
+    Storage::FileSystem,
+    System::{Pipes, Threading, IO},
+};
 
 pub fn fetch_remote_process_handle(
     remote: &Remote,

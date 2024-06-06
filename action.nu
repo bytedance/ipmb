@@ -139,3 +139,7 @@ export def "demo js" [] {
 
 	node ipmb-js/examples/node_client.js
 }
+
+export def fmt [] {
+    cargo +nightly fmt
+}

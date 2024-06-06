@@ -1,8 +1,11 @@
-use std::ffi::{c_void, CStr};
-use std::ops::{Deref, DerefMut};
-use std::os::raw::c_char;
-use std::time::Duration;
-use std::{mem, ptr, slice};
+use std::{
+    ffi::{c_void, CStr},
+    mem,
+    ops::{Deref, DerefMut},
+    os::raw::c_char,
+    ptr, slice,
+    time::Duration,
+};
 
 type ErrorCode = i32;
 

@@ -1,11 +1,18 @@
 use super::Handle;
 use crate::{util, Error};
-use std::ops::RangeBounds;
-use std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
-use std::sync::Once;
-use std::{mem, slice};
-use windows::Win32::Foundation;
-use windows::Win32::System::{Memory, SystemInformation};
+use std::{
+    mem,
+    ops::RangeBounds,
+    slice,
+    sync::{
+        atomic::{AtomicU32, AtomicU64, Ordering},
+        Once,
+    },
+};
+use windows::Win32::{
+    Foundation,
+    System::{Memory, SystemInformation},
+};
 
 const MEMORY_REGION_HEADER_REFERENCE_COUNT: usize = 4;
 const MEMORY_REGION_HEADER_BUFFER_SIZE: usize = 8;

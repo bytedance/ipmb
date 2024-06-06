@@ -1,16 +1,24 @@
-use crate::message::{ConnectMessage, ConnectMessageAck};
-use crate::util::Align4;
 use crate::{
-    decode, version, EndpointID, Error, Label, LabelOp, Message, MessageBox, Selector, Version,
+    decode,
+    message::{ConnectMessage, ConnectMessageAck},
+    util::Align4,
+    version, EndpointID, Error, Label, LabelOp, Message, MessageBox, Selector, Version,
 };
 pub use memory_region::MemoryRegion;
-use std::ffi::CString;
-use std::hash::Hash;
-use std::os::unix::prelude::{AsRawFd, FromRawFd, OwnedFd};
-use std::sync::mpsc::{Receiver, Sender, TryRecvError};
-use std::sync::{mpsc, Arc, Once};
-use std::time::{Duration, Instant};
-use std::{mem, ptr, slice, thread};
+use std::{
+    ffi::CString,
+    hash::Hash,
+    mem,
+    os::unix::prelude::{AsRawFd, FromRawFd, OwnedFd},
+    ptr, slice,
+    sync::{
+        mpsc,
+        mpsc::{Receiver, Sender, TryRecvError},
+        Arc, Once,
+    },
+    thread,
+    time::{Duration, Instant},
+};
 use type_uuid::TypeUuid;
 
 pub mod mach_sys;

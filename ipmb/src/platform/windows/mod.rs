@@ -1,25 +1,35 @@
-use crate::message::{ConnectMessage, ConnectMessageAck};
-use crate::util::Align4;
 use crate::{
-    decode, encode, version, EndpointID, Error, Label, LabelOp, Message, MessageBox, Selector,
-    Version,
+    decode, encode,
+    message::{ConnectMessage, ConnectMessageAck},
+    util::Align4,
+    version, EndpointID, Error, Label, LabelOp, Message, MessageBox, Selector, Version,
 };
 pub use memory_region::MemoryRegion;
 use security::SecurityAttr;
-use std::mem::MaybeUninit;
-use std::ops::Deref;
-use std::os::windows::prelude::{
-    AsRawHandle, FromRawHandle, HandleOrInvalid, IntoRawHandle, OwnedHandle, RawHandle,
+use std::{
+    mem,
+    mem::MaybeUninit,
+    ops::Deref,
+    os::windows::prelude::{
+        AsRawHandle, FromRawHandle, HandleOrInvalid, IntoRawHandle, OwnedHandle, RawHandle,
+    },
+    ptr, slice,
+    sync::{
+        mpsc,
+        mpsc::{Receiver, Sender, TryRecvError},
+        Arc,
+    },
+    time::Duration,
 };
-use std::sync::mpsc::{Receiver, Sender, TryRecvError};
-use std::sync::{mpsc, Arc};
-use std::time::Duration;
-use std::{mem, ptr, slice};
 use type_uuid::*;
-use windows::core::HSTRING;
-use windows::Win32::Foundation::{self, WIN32_ERROR};
-use windows::Win32::Storage::FileSystem;
-use windows::Win32::System::{Pipes, Threading, IO};
+use windows::{
+    core::HSTRING,
+    Win32::{
+        Foundation::{self, WIN32_ERROR},
+        Storage::FileSystem,
+        System::{Pipes, Threading, IO},
+    },
+};
 
 mod memory_region;
 mod pipe;

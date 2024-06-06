@@ -1,7 +1,6 @@
 use ipmb::{label, MessageBox};
 use serde::{Deserialize, Serialize};
-use std::thread;
-use std::time::Duration;
+use std::{thread, time::Duration};
 use type_uuid::TypeUuid;
 
 fn main() {

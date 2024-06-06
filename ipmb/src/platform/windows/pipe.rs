@@ -1,11 +1,10 @@
-use super::security::SecurityAttr;
-use super::Handle;
+use super::{security::SecurityAttr, Handle};
 use crate::{util, Error};
 use std::os::windows::prelude::{FromRawHandle, HandleOrInvalid, OwnedHandle};
-use windows::core::HSTRING;
-use windows::Win32::Foundation;
-use windows::Win32::Storage::FileSystem;
-use windows::Win32::System::Pipes;
+use windows::{
+    core::HSTRING,
+    Win32::{Foundation, Storage::FileSystem, System::Pipes},
+};
 
 pub(crate) const DEFAULT_BUFFER_SIZE: u32 = 4 << 20;
 

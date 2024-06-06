@@ -1,9 +1,11 @@
 use crate::Error;
 use std::{mem, ptr};
-use windows::Win32::Foundation;
-use windows::Win32::Security::{self, Authorization};
-use windows::Win32::Storage::FileSystem;
-use windows::Win32::System::{Memory, SystemServices};
+use windows::Win32::{
+    Foundation,
+    Security::{self, Authorization},
+    Storage::FileSystem,
+    System::{Memory, SystemServices},
+};
 
 const SECURITY_DESCRIPTOR_MIN_LENGTH: usize = 64;
 

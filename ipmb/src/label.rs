@@ -1,8 +1,7 @@
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
 use smol_str::SmolStr;
-use std::iter;
-use std::ops::Not;
+use std::{iter, ops::Not};
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Label(SmallVec<[SmolStr; 8]>);

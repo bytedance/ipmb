@@ -9,12 +9,17 @@ pub use options::Options;
 use platform::{look_up, register, EncodedMessage, IoHub, IoMultiplexing, Remote};
 pub use platform::{MemoryRegion, Object};
 use serde::{Deserialize, Serialize};
-use std::fmt::{Display, Formatter};
-use std::marker::PhantomData;
-use std::sync::mpsc::{Receiver, RecvTimeoutError, Sender};
-use std::sync::{mpsc, Arc, Mutex, RwLock};
-use std::thread;
-use std::time::{Duration, Instant};
+use std::{
+    fmt::{Display, Formatter},
+    marker::PhantomData,
+    sync::{
+        mpsc,
+        mpsc::{Receiver, RecvTimeoutError, Sender},
+        Arc, Mutex, RwLock,
+    },
+    thread,
+    time::{Duration, Instant},
+};
 use type_uuid::Bytes;
 use util::EndpointID;
 

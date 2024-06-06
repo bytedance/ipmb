@@ -1,8 +1,11 @@
 use ipmb::label;
-use std::process::Command;
-use std::sync::mpsc::{self, RecvTimeoutError};
-use std::time::Duration;
-use std::{env, thread};
+use std::{
+    env,
+    process::Command,
+    sync::mpsc::{self, RecvTimeoutError},
+    thread,
+    time::Duration,
+};
 
 fn main() {
     let mut args = env::args();

@@ -1,8 +1,11 @@
 use super::{mach_sys, MachPort};
 use crate::{util, Error};
-use std::ops::RangeBounds;
-use std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
-use std::{mem, slice};
+use std::{
+    mem,
+    ops::RangeBounds,
+    slice,
+    sync::atomic::{AtomicU32, AtomicU64, Ordering},
+};
 
 // https://opensource.apple.com/source/xnu/xnu-792.25.20/osfmk/mach/vm_statistics.h
 const VM_FLAGS_ANYWHERE: libc::c_int = 0x0001;

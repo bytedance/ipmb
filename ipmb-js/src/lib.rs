@@ -1,9 +1,11 @@
-use napi::bindgen_prelude::*;
-use napi::{NapiRaw, NapiValue};
+use napi::{bindgen_prelude::*, NapiRaw, NapiValue};
 use napi_derive::napi;
-use std::sync::{mpsc, Arc, Mutex};
-use std::time::{Duration, Instant};
-use std::{ffi, mem, ptr, thread};
+use std::{
+    ffi, mem, ptr,
+    sync::{mpsc, Arc, Mutex},
+    thread,
+    time::{Duration, Instant},
+};
 
 #[napi]
 pub enum SelectorMode {

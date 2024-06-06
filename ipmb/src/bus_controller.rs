@@ -1,12 +1,16 @@
-use crate::message::{ConnectMessage, ConnectMessageAck};
-use crate::platform::IoHub;
 use crate::{
-    decode, version, EncodedMessage, EndpointID, Error, Label, LabelOp, Message, Remote, Selector,
+    decode,
+    message::{ConnectMessage, ConnectMessageAck},
+    platform::IoHub,
+    version, EncodedMessage, EndpointID, Error, Label, LabelOp, Message, Remote, Selector,
     SelectorMode,
 };
-use std::sync::mpsc::Sender;
-use std::time::{Duration, Instant};
-use std::{mem, thread};
+use std::{
+    mem,
+    sync::mpsc::Sender,
+    thread,
+    time::{Duration, Instant},
+};
 use type_uuid::TypeUuid;
 
 pub struct BusController {

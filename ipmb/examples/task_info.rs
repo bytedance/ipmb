@@ -1,7 +1,5 @@
 use ipmb::label;
-use std::env;
-use std::process::Command;
-use std::time::Duration;
+use std::{env, process::Command, time::Duration};
 
 fn main() {
     let mut args = env::args();

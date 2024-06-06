@@ -1,11 +1,12 @@
 use ipmb::label;
 use num_format::{Locale, ToFormattedString};
-use rand::distributions::Alphanumeric;
-use rand::Rng;
-use std::env;
-use std::process::Command;
-use std::thread;
-use std::time::{Duration, Instant};
+use rand::{distributions::Alphanumeric, Rng};
+use std::{
+    env,
+    process::Command,
+    thread,
+    time::{Duration, Instant},
+};
 
 fn main() {
     let mut builder = env_logger::Builder::new();

@@ -1,5 +1,4 @@
-use crate::platform::Remote;
-use crate::Version;
+use crate::{platform::Remote, Version};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
