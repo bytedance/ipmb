@@ -35,7 +35,12 @@ pub struct Remote {
 
 impl Remote {
     pub fn is_dead(&self) -> bool {
-        unsafe { !FileSystem::WriteFile(self.pipe.as_raw_windows(), None, None, None).as_bool() }
+        // Compatible with Windows 7
+        let mut written = 0;
+        unsafe {
+            !FileSystem::WriteFile(self.pipe.as_raw_windows(), None, Some(&mut written), None)
+                .as_bool()
+        }
     }
 }
 

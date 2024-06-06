@@ -120,7 +120,16 @@ pub(crate) fn reply_current_process_handle(encoded_msg: EncodedMessage) -> Resul
         // Reply to remote
         let pseudo_h = remote_h.pseudo_handle.unwrap() as isize as i64;
         let buf = std::slice::from_raw_parts(&pseudo_h as *const i64 as *const u8, 8);
-        if !FileSystem::WriteFile(pipe_handle.as_raw_windows(), Some(buf), None, None).as_bool() {
+        // Compatible with Windows 7
+        let mut written = 0;
+        if !FileSystem::WriteFile(
+            pipe_handle.as_raw_windows(),
+            Some(buf),
+            Some(&mut written),
+            None,
+        )
+        .as_bool()
+        {
             return Err(Error::WinError(windows::core::Error::from_win32()));
         }
 

@@ -1,0 +1,3 @@
+[toolchain]
+# Compatible with Windows 7
+channel = "1.75.0"
