@@ -4,6 +4,7 @@ use rand::distributions::Alphanumeric;
 use rand::Rng;
 use std::env;
 use std::process::Command;
+use std::thread;
 use std::time::{Duration, Instant};
 
 fn main() {
@@ -40,7 +41,7 @@ fn main() {
                     .unwrap();
 
                 // Wait receiver
-                // std::thread::sleep(Duration::from_secs(2));
+                thread::sleep(Duration::from_secs(2));
 
                 let mut selector = ipmb::Selector::unicast(format!("receiver-{i}"));
                 selector.ttl = Duration::from_secs(2);
