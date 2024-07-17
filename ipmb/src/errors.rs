@@ -26,6 +26,8 @@ pub enum Error {
     WinError(#[from] windows::core::Error),
     #[error("memory region mapping error")]
     MemoryRegionMapping,
+    #[error("permisson denied")]
+    PermissonDenied,
     #[error("unknown error")]
     Unknown,
 }
@@ -38,6 +40,8 @@ pub enum JoinError {
     TokenMismatch,
     #[error("timeout")]
     Timeout,
+    #[error("permisson denied")]
+    PermissonDenied,
 }
 
 #[derive(Debug, Error)]
@@ -48,6 +52,8 @@ pub enum SendError {
     VersionMismatch(Version),
     #[error("token mismatch")]
     TokenMismatch,
+    #[error("permisson denied")]
+    PermissonDenied,
 }
 
 impl From<JoinError> for SendError {
@@ -56,6 +62,7 @@ impl From<JoinError> for SendError {
             JoinError::VersionMismatch(v) => Self::VersionMismatch(v),
             JoinError::TokenMismatch => Self::TokenMismatch,
             JoinError::Timeout => Self::Timeout,
+            JoinError::PermissonDenied => Self::PermissonDenied,
         }
     }
 }
@@ -70,6 +77,8 @@ pub enum RecvError {
     VersionMismatch(Version),
     #[error("token mismatch")]
     TokenMismatch,
+    #[error("permisson denied")]
+    PermissonDenied,
 }
 
 impl From<JoinError> for RecvError {
@@ -78,6 +87,7 @@ impl From<JoinError> for RecvError {
             JoinError::VersionMismatch(v) => Self::VersionMismatch(v),
             JoinError::TokenMismatch => Self::TokenMismatch,
             JoinError::Timeout => Self::Timeout,
+            JoinError::PermissonDenied => Self::PermissonDenied,
         }
     }
 }

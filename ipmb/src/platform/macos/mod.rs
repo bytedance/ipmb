@@ -104,6 +104,7 @@ pub(crate) fn look_up(
                 }
             }
             mach_sys::BOOTSTRAP_UNKNOWN_SERVICE => Err(Error::IdentifierNotInUse),
+            mach_sys::BOOTSTRAP_NOT_PRIVILEGED => Err(Error::PermissonDenied),
             _ => Err(Error::Unknown), // TODO
         }
     }
@@ -125,9 +126,14 @@ pub(crate) fn register(
         match r {
             mach_sys::BOOTSTRAP_SUCCESS => {
                 let (bus_sender, bus_receiver) = mpsc::channel();
-                Ok((IoHub::for_bus_controller(local, bus_receiver, im), bus_sender, EndpointID::new()))
-            },
-            mach_sys::BOOTSTRAP_NAME_IN_USE | mach_sys::BOOTSTRAP_NOT_PRIVILEGED /* TODO */ => Err(Error::IdentifierInUse),
+                Ok((
+                    IoHub::for_bus_controller(local, bus_receiver, im),
+                    bus_sender,
+                    EndpointID::new(),
+                ))
+            }
+            mach_sys::BOOTSTRAP_NAME_IN_USE => Err(Error::IdentifierInUse),
+            mach_sys::BOOTSTRAP_NOT_PRIVILEGED => Err(Error::PermissonDenied),
             _ => Err(Error::Unknown), // TODO
         }
     }

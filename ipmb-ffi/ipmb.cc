@@ -453,6 +453,8 @@ namespace ipmb {
                 return Error::kTokenMismatch;
             case ipmb_ffi::ERROR_CODE_VERSION_MISMATCH:
                 return Error::kVersionMismatch;
+            case ipmb_ffi::ERROR_CODE_PERMISSION_DENIED:
+                return Error::kPermissionDenied;
             default:
                 return Error::kUnknown;
         }
@@ -504,6 +506,8 @@ namespace ipmb {
                 return std::make_tuple(Message(), Error::kTokenMismatch);
             case ipmb_ffi::ERROR_CODE_VERSION_MISMATCH:
                 return std::make_tuple(Message(), Error::kVersionMismatch);
+            case ipmb_ffi::ERROR_CODE_PERMISSION_DENIED:
+                return std::make_tuple(Message(), Error::kPermissionDenied);
             default:
                 return std::make_tuple(Message(), Error::kUnknown);
         }
@@ -526,6 +530,8 @@ namespace ipmb {
                 return std::make_tuple(Sender(), Receiver(), Error::kTokenMismatch);
             case ipmb_ffi::ERROR_CODE_VERSION_MISMATCH:
                 return std::make_tuple(Sender(), Receiver(), Error::kVersionMismatch);
+            case ipmb_ffi::ERROR_CODE_PERMISSION_DENIED:
+                return std::make_tuple(Sender(), Receiver(), Error::kPermissionDenied);
             default:
                 return std::make_tuple(Sender(), Receiver(), Error::kUnknown);
         }

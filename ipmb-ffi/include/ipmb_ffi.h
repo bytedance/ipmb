@@ -70,6 +70,8 @@ constexpr static const ErrorCode ERROR_CODE_VERSION_MISMATCH = -4;
 
 constexpr static const ErrorCode ERROR_CODE_TOKEN_MISMATCH = -5;
 
+constexpr static const ErrorCode ERROR_CODE_PERMISSION_DENIED = -6;
+
 extern "C" {
 
 void ipmb_rstring_data(const RString *rstring, const char **ptr, uintptr_t *size);

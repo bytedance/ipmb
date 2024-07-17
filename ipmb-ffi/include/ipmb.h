@@ -13,6 +13,7 @@ namespace ipmb {
         kDecode = 3,
         kVersionMismatch = 4,
         kTokenMismatch = 5,
+        kPermissionDenied = 6,
     };
 
     class Version {

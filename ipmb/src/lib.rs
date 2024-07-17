@@ -483,6 +483,9 @@ impl Rule {
                             break rule;
                         }
                         Err(Error::IdentifierInUse) => {}
+                        Err(Error::PermissonDenied) => {
+                            return Err(JoinError::PermissonDenied);
+                        }
                         Err(err) => {
                             log::error!("register: {:?}", err);
                             wait!();
@@ -494,6 +497,9 @@ impl Rule {
                 }
                 Err(Error::TokenMismatch) => {
                     return Err(JoinError::TokenMismatch);
+                }
+                Err(Error::PermissonDenied) => {
+                    return Err(JoinError::PermissonDenied);
                 }
                 Err(Error::Timeout) => {
                     timeout_count += 1;
