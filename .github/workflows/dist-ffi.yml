@@ -30,7 +30,7 @@ jobs:
           MACOSX_DEPLOYMENT_TARGET: 10.11
       - if: "matrix.os == 'windows-latest'"
         run: |
-          nu -n -c "use action.nu *; build ffi x86_64-pc-windows-msvc i686-pc-windows-msvc"
+          nu -n -c "use action.nu *; rustup override set 1.75.0; build ffi x86_64-pc-windows-msvc i686-pc-windows-msvc"
       - uses: softprops/action-gh-release@v1
         with:
           files: |
