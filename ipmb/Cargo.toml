@@ -1,7 +1,7 @@
 [package]
 name = "ipmb"
 description = "Inter-process message bus"
-version = "0.7.6"
+version = "0.7.14"
 authors = ["ipmb developers"]
 edition = "2021"
 rust-version.workspace = true
