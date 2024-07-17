@@ -5,8 +5,8 @@ export def setup [] {
 }
 
 export def pack [archive: string, ...files: string] {
-    if (sys | get host | get name) == "Windows" {
-        let command = $"Compress-Archive -Path ($files | flatten | str join ', ') -DestinationPath ($archive)"
+    if (sys host).name == "Windows" {
+        let command = $"Compress-Archive -Path ($files | str join ', ') -DestinationPath ($archive)"
 
         if (which pwsh | is-empty) {
             powershell -Command $command
@@ -14,7 +14,7 @@ export def pack [archive: string, ...files: string] {
             pwsh -Command $command
         }
     } else {
-        ^zip -r $archive ($files | flatten)
+        ^zip -r $archive ...$files
     }
 }
 
@@ -47,7 +47,7 @@ export def "build js" [...targets: string] {
 
         # Pack symbols
         cd $"target/($target)/release/";
-        for name in [ipmb-js] {
+        for name in [ipmb_js] {
             let sym = (if ($target | str contains "darwin") {
                 let sym = $"lib($name).dylib.dSYM"
                 pack $"($sym)-v($version)-($target).zip" $"($sym)" 
@@ -83,7 +83,7 @@ export def "build ffi" [...targets: string] {
 
         # Pack symbols
         cd $"target/($target)/release/";
-        for name in [ipmb-ffi] {
+        for name in [ipmb_ffi] {
             let sym = (if ($target | str contains "darwin") {
                 let sym = $"lib($name).dylib.dSYM"
                 pack $"($sym)-v($version)-($target).zip" $"($sym)" 
@@ -106,7 +106,7 @@ export def "build ffi" [...targets: string] {
             cp $"target/($target)/release/($name)" ipmb-ffi/
         }
         cd ipmb-ffi
-        pack $"ipmb-ffi-v($version)-($target).zip" include/ ipmb.cc $dy 
+        pack $"ipmb-ffi-v($version)-($target).zip" include/ ipmb.cc ...$dy 
         for name in $dy {
             rm $name 
         }
