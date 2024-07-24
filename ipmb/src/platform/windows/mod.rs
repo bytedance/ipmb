@@ -2,9 +2,10 @@ use crate::{
     decode, encode,
     message::{ConnectMessage, ConnectMessageAck},
     util::Align4,
-    version, EndpointID, Error, Label, LabelOp, Message, MessageBox, Selector, Version,
+    version, EndpointID, Error, Label, LabelOp, MemoryRegion, Message, MessageBox, Selector,
+    Version,
 };
-pub use memory_region::MemoryRegion;
+pub(crate) use memory_region::page_mask;
 use security::SecurityAttr;
 use std::{
     mem,

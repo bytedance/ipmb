@@ -292,7 +292,11 @@ pub fn join(options: Options, timeout: Option<u32>, mut env: Env) -> Result<napi
                     tsfn.call(DelegateAction::CleanTimeout);
                 }
             },
-            Err(ipmb::RecvError::VersionMismatch(_) | ipmb::RecvError::TokenMismatch | ipmb::RecvError::PermissonDenied) => {
+            Err(
+                ipmb::RecvError::VersionMismatch(_)
+                | ipmb::RecvError::TokenMismatch
+                | ipmb::RecvError::PermissonDenied,
+            ) => {
                 tsfn.call(DelegateAction::Recv(r));
                 tsfn.destroy();
                 break;
