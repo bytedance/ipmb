@@ -558,7 +558,6 @@ impl<T: MessageBox> Message<T> {
             let payload_bytes = self.payload.encode().unwrap();
 
             let msg_size = 4
-                + 16
                 + 4
                 + (self.objects.len() + self.memory_regions.len()) * 8
                 + 4
@@ -576,13 +575,7 @@ impl<T: MessageBox> Message<T> {
                 *version_ptr = mem::transmute([0xFF, v.major(), v.minor(), v.patch()]);
             }
 
-            // Reply
-            let reply_process_ptr = version_ptr.offset(1) as *mut u64;
-            ptr::write_unaligned(reply_process_ptr, 0);
-            let reply_pipe_ptr = reply_process_ptr.offset(1);
-            ptr::write_unaligned(reply_pipe_ptr, 0);
-
-            let object_count_ptr = reply_pipe_ptr.offset(1) as *mut u32;
+            let object_count_ptr = version_ptr.offset(1);
             *object_count_ptr = (self.objects.len() + self.memory_regions.len()) as _;
 
             let object_ptr = object_count_ptr.add(1) as *mut u64;
