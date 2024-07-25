@@ -11,7 +11,7 @@ members = [
 rust-version = "1.65"
 
 [workspace.dependencies.ipmb]
-version = "0.7.14"
+version = "0.8.0"
 path = "ipmb"
 
 [workspace.dependencies.ipmb-derive]
