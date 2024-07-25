@@ -78,7 +78,7 @@ pub(crate) fn look_up(
                 };
                 let local = MachPort::with_receive_right();
 
-                let msg = Message::new(
+                let mut msg = Message::new(
                     Selector::unicast(LabelOp::True),
                     ConnectMessage {
                         version: version(),
@@ -86,10 +86,8 @@ pub(crate) fn look_up(
                         label,
                     },
                 );
+                msg.objects.push(local.clone());
                 let mut encoded_msg = msg.into_encoded();
-
-                encoded_msg.add_local(local.clone());
-
                 encoded_msg.send(&remote)?;
 
                 let mut io_hub: IoHub = IoHub::for_endpoint(local, im);
@@ -364,7 +362,6 @@ impl<T: MessageBox> Message<T> {
             mach_msg,
             objects: self.objects,
             memory_regions: self.memory_regions,
-            reply: None,
         }
     }
 }
@@ -375,29 +372,19 @@ pub(crate) struct EncodedMessage {
     mach_msg: Vec<u8>,
     pub objects: Vec<MachPort>,
     pub memory_regions: Vec<MemoryRegion>,
-    reply: Option<MachPort>,
 }
 
 impl EncodedMessage {
-    fn add_local(&mut self, local: MachPort) {
-        self.reply = Some(local);
-    }
-
     pub fn extract_remote(&mut self) -> Option<Remote> {
         debug_assert_eq!(self.selector.uuid, <ConnectMessage as TypeUuid>::UUID);
 
-        self.reply.take().map(|reply| Remote { port: reply })
+        let reply = self.objects.pop()?;
+        Some(Remote { port: reply })
     }
 
     pub fn send(&mut self, remote: &Remote) -> Result<(), Error> {
         unsafe {
             let header_ptr = self.mach_msg.as_mut_ptr() as *mut BaseMessage;
-
-            if let Some(reply) = &self.reply {
-                (*header_ptr).header.msgh_local_port = reply.as_raw();
-                (*header_ptr).header.msgh_bits |=
-                    mach_msgh_bits_set(0, mach_sys::MACH_MSG_TYPE_MAKE_SEND, 0, 0);
-            }
 
             (*header_ptr).header.msgh_remote_port = remote.port.as_raw();
 
@@ -448,31 +435,17 @@ impl EncodedMessage {
                 descriptor_ptr = descriptor_ptr.offset(1);
             }
 
-            // Connect message
-            let remote = (*base_ptr).header.msgh_remote_port;
-            let remote = if remote > 0 {
-                Some(MachPort::from_raw(remote))
-            } else {
-                None
-            };
-
             // Version
             let version_ptr = descriptor_ptr as *mut u32;
             let [magic, major, minor, patch]: [u8; 4] = mem::transmute(*version_ptr);
             let remote_version = Version((major, minor, patch));
 
             if magic != 0xFF {
-                return Err(Error::VersionMismatch(
-                    Version((0, 0, 0)),
-                    remote.map(|remote| Remote { port: remote }),
-                ));
+                return Err(Error::VersionMismatch(Version((0, 0, 0)), None));
             }
 
             if !version().compatible(remote_version) {
-                return Err(Error::VersionMismatch(
-                    remote_version,
-                    remote.map(|remote| Remote { port: remote }),
-                ));
+                return Err(Error::VersionMismatch(remote_version, None));
             }
 
             let selector_size_ptr = version_ptr.offset(1);
@@ -522,7 +495,6 @@ impl EncodedMessage {
                 mach_msg,
                 objects,
                 memory_regions,
-                reply: remote,
             })
         }
     }

@@ -110,7 +110,7 @@ pub(crate) fn look_up(
         let (read_pipe, write_pipe) = pipe::anon_pipe(&im.sa)?;
         let read_pipe = NamedPipe::new(read_pipe, NamedPipeStatus::Readable);
 
-        let msg = Message::new(
+        let mut msg = Message::new(
             Selector::unicast(LabelOp::True),
             ConnectMessage {
                 version: version(),
@@ -118,15 +118,12 @@ pub(crate) fn look_up(
                 label,
             },
         );
+        msg.objects.push(Handle(OwnedHandle::from_raw_handle(
+            Threading::GetCurrentProcess().0 as _,
+        )));
+        msg.objects.push(write_pipe);
 
         let mut encoded_msg = msg.into_encoded();
-        encoded_msg.add_local(
-            Handle(OwnedHandle::from_raw_handle(
-                Threading::GetCurrentProcess().0 as _,
-            )),
-            write_pipe,
-        );
-
         encoded_msg.send(&remote)?;
 
         let mut io_hub: IoHub = IoHub::for_endpoint(im, identifier, read_pipe);
@@ -390,30 +387,11 @@ fn send_helper(
     msg_size: usize,
     objects: &[Handle],
     memory_regions: &[MemoryRegion],
-    reply: Option<&[Handle; 2]>,
 ) -> Result<(), Error> {
     unsafe {
         let mut remote_objects = Vec::with_capacity(objects.len() + memory_regions.len());
 
-        let reply_process_ptr = (pipe_msg.as_mut_ptr() as *mut u32).offset(1) as *mut u64;
-        let reply_pipe_ptr = reply_process_ptr.offset(1);
-
-        // Write reply
-        if let Some(replay) = reply {
-            for (object, object_ptr) in replay.into_iter().zip([reply_process_ptr, reply_pipe_ptr])
-            {
-                let remote_object = object
-                    .to_remote(remote.process.as_ref().unwrap())
-                    .map_err(|_| Error::Disconnect)?;
-                ptr::write_unaligned(
-                    object_ptr,
-                    remote_object.pseudo_handle.unwrap() as isize as u64,
-                );
-                remote_objects.push(remote_object);
-            }
-        }
-
-        let object_count_ptr = reply_pipe_ptr.offset(1) as *mut u32;
+        let object_count_ptr = (pipe_msg.as_mut_ptr() as *mut u32).offset(1);
         let mut object_ptr = object_count_ptr.add(1) as *mut u64;
 
         for object in objects
@@ -467,8 +445,6 @@ fn send_helper(
 
 /// Message layout
 /// | version (magic__major__minor__patch)
-/// | reply process (u64)
-/// | reply pipe (u64)
 /// | object_count (u32)
 /// | object (u64) * N
 /// | selector_size (u32)
@@ -485,17 +461,15 @@ pub(crate) struct EncodedMessage {
     msg_size: usize,
     pub objects: Vec<Handle>,
     pub memory_regions: Vec<MemoryRegion>,
-    reply: Option<[Handle; 2]>,
 }
 
 impl EncodedMessage {
-    pub fn add_local(&mut self, process: Handle, pipe: Handle) {
-        self.reply = Some([process, pipe]);
-    }
-
     pub fn extract_remote(&mut self) -> Option<Remote> {
         debug_assert_eq!(self.selector.uuid, <ConnectMessage as TypeUuid>::UUID);
-        self.reply.take().map(|[process, pipe]| Remote {
+
+        let pipe = self.objects.pop()?;
+        let process = self.objects.pop()?;
+        Some(Remote {
             pipe,
             process: Some(process),
         })
@@ -508,7 +482,6 @@ impl EncodedMessage {
             self.msg_size,
             self.objects.as_slice(),
             self.memory_regions.as_slice(),
-            self.reply.as_ref(),
         )
     }
 
@@ -526,21 +499,7 @@ impl EncodedMessage {
                 return Err(Error::VersionMismatch(Version((0, 0, 0)), None));
             }
 
-            // Reply
-            let reply_process_ptr = version_ptr.offset(1) as *mut u64;
-            let reply_pipe_ptr = reply_process_ptr.offset(1);
-            let reply_process = ptr::read_unaligned(reply_process_ptr);
-            let reply_pipe = ptr::read_unaligned(reply_pipe_ptr);
-            let reply = if reply_process > 0 && reply_pipe > 0 {
-                Some([
-                    Handle(OwnedHandle::from_raw_handle(reply_process as isize as _)),
-                    Handle(OwnedHandle::from_raw_handle(reply_pipe as isize as _)),
-                ])
-            } else {
-                None
-            };
-
-            let object_count_ptr = reply_pipe_ptr.offset(1) as *mut u32;
+            let object_count_ptr = version_ptr.offset(1);
             let object_count = *object_count_ptr;
 
             let mut object_ptr = object_count_ptr.add(1) as *mut u64;
@@ -553,13 +512,7 @@ impl EncodedMessage {
             }
 
             if !version().compatible(remote_version) {
-                return Err(Error::VersionMismatch(
-                    remote_version,
-                    reply.map(|[process, pipe]| Remote {
-                        pipe,
-                        process: Some(process),
-                    }),
-                ));
+                return Err(Error::VersionMismatch(remote_version, None));
             }
 
             let selector_size_ptr = object_ptr as *mut u32;
@@ -592,7 +545,6 @@ impl EncodedMessage {
                 msg_size,
                 objects,
                 memory_regions,
-                reply,
             })
         }
     }
@@ -666,7 +618,6 @@ impl<T: MessageBox> Message<T> {
             msg_size,
             objects: self.objects,
             memory_regions: self.memory_regions,
-            reply: None,
         }
     }
 }
