@@ -10,7 +10,13 @@ use std::{
 pub type Object = self::macos::MachPort;
 #[cfg(target_os = "windows")]
 pub type Object = self::windows::Handle;
+#[cfg(target_os = "linux")]
+pub type Object = self::linux::Fd;
 
+#[cfg(target_os = "linux")]
+pub(crate) use self::linux::{
+    look_up, page_mask, register, EncodedMessage, IoHub, IoMultiplexing, Remote,
+};
 #[cfg(target_os = "macos")]
 pub(crate) use self::macos::{
     look_up, page_mask, register, EncodedMessage, IoHub, IoMultiplexing, Remote,
@@ -20,6 +26,8 @@ pub(crate) use self::windows::{
     look_up, page_mask, register, EncodedMessage, IoHub, IoMultiplexing, Remote,
 };
 
+#[cfg(target_os = "linux")]
+pub mod linux;
 #[cfg(target_os = "macos")]
 pub mod macos;
 #[cfg(target_os = "windows")]

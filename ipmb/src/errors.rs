@@ -24,6 +24,8 @@ pub enum Error {
     #[cfg(target_os = "windows")]
     #[error("win error: {0}")]
     WinError(#[from] windows::core::Error),
+    #[error("io error: {0}")]
+    IoError(#[from] std::io::Error),
     #[error("memory region mapping error")]
     MemoryRegionMapping,
     #[error("permisson denied")]
