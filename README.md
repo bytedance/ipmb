@@ -3,7 +3,7 @@
       <td align="center">
          <img src="logo.png" width="25%">
 
-An interprocess message bus system built in Rust, which can be used to pass messages between multiple processes, even including kernel objects (HANDLE/MachPort).
+An interprocess message bus system built in Rust, which can be used to pass messages between multiple processes, even including kernel objects (HANDLE/MachPort/FD).
       </td>
    </tr>
 </table>
@@ -22,7 +22,7 @@ An interprocess message bus system built in Rust, which can be used to pass mess
 
 ```toml
 [dependencies]
-ipmb = "0.7"
+ipmb = "0.8"
 ```
 
 `earth.rs`:
@@ -172,9 +172,9 @@ fn main() {
 
 | Platform |     |
 |----------|-----|
-| macOS    | ✅   |
-| Windows  | ✅   |
-| Linux    | 🛠️ |
+| macOS    | ✅  |
+| Windows  | ✅  |
+| Linux    | ✅  |
 
 ## Benchmark 
 
