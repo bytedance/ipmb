@@ -18,6 +18,8 @@ mod encoded_message;
 mod fd;
 mod io_mul;
 
+static MAXIMUM_BUF_SIZE: i32 = 64 << 10;
+
 impl MemoryRegion {
     pub(crate) fn obj_new(size: usize) -> Object {
         unsafe {
@@ -119,6 +121,13 @@ pub(crate) fn look_up(
                 _ => Error::IoError(err),
             });
         }
+        let _ = libc::setsockopt(
+            fd.as_raw(),
+            libc::SOL_SOCKET,
+            libc::SO_SNDBUF,
+            &MAXIMUM_BUF_SIZE as *const _ as _,
+            mem::size_of_val(&MAXIMUM_BUF_SIZE) as _,
+        );
         let remote = Remote::new(fd);
 
         let mut pair = [0, 0];
@@ -137,6 +146,21 @@ pub(crate) fn look_up(
 
         let _ = libc::shutdown(read_fd.as_raw(), libc::SHUT_WR);
         let _ = libc::shutdown(write_fd.as_raw(), libc::SHUT_RD);
+
+        let _ = libc::setsockopt(
+            read_fd.as_raw(),
+            libc::SOL_SOCKET,
+            libc::SO_RCVBUF,
+            &MAXIMUM_BUF_SIZE as *const _ as _,
+            mem::size_of_val(&MAXIMUM_BUF_SIZE) as _,
+        );
+        let _ = libc::setsockopt(
+            write_fd.as_raw(),
+            libc::SOL_SOCKET,
+            libc::SO_SNDBUF,
+            &MAXIMUM_BUF_SIZE as *const _ as _,
+            mem::size_of_val(&MAXIMUM_BUF_SIZE) as _,
+        );
 
         /*
         let mut read_flags = libc::fcntl(read_pipe.as_raw(), libc::F_GETFL, 0);
@@ -295,9 +319,16 @@ impl IoHub {
                             let fd =
                                 libc::accept(listener.as_raw(), ptr::null_mut(), ptr::null_mut());
                             if fd != -1 {
-                                let pipe = Local(Fd::from_raw(fd));
-                                self.im.register(&pipe.0);
-                                self.local_list.push(pipe);
+                                let local = Local(Fd::from_raw(fd));
+                                let _ = libc::setsockopt(
+                                    local.0.as_raw(),
+                                    libc::SOL_SOCKET,
+                                    libc::SO_RCVBUF,
+                                    &MAXIMUM_BUF_SIZE as *const _ as _,
+                                    mem::size_of_val(&MAXIMUM_BUF_SIZE) as _,
+                                );
+                                self.im.register(&local.0);
+                                self.local_list.push(local);
                             }
                         }
                         continue;
