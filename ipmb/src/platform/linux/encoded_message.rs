@@ -76,20 +76,21 @@ impl EncodedMessage {
             }
 
             // parse
-            let control_ptr = control_data.as_ptr() as *const libc::cmsghdr;
-            let mut control_data_ptr = libc::CMSG_DATA(control_ptr) as *const RawFd;
+            let mut objects = vec![];
 
-            let control_count = ((*control_ptr).cmsg_len
-                - (control_data_ptr as usize - control_ptr as usize))
-                / mem::size_of::<RawFd>();
+            if hdr.msg_controllen > 0 {
+                let control_ptr = control_data.as_ptr() as *const libc::cmsghdr;
+                let mut control_data_ptr = libc::CMSG_DATA(control_ptr) as *const RawFd;
 
-            let mut objects: Vec<_> = (0..control_count)
-                .map(|_| {
-                    let obj = Object::from_raw(ptr::read(control_data_ptr));
+                let control_count = ((*control_ptr).cmsg_len
+                    - (control_data_ptr as usize - control_ptr as usize))
+                    / mem::size_of::<RawFd>();
+
+                for _ in 0..control_count {
+                    objects.push(Object::from_raw(ptr::read(control_data_ptr)));
                     control_data_ptr = control_data_ptr.offset(1);
-                    obj
-                })
-                .collect();
+                }
+            }
 
             let version_ptr = iov_data.as_ptr() as *const u32;
             let [magic, major, minor, patch]: [u8; 4] = mem::transmute(*version_ptr);
