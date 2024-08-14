@@ -26,5 +26,5 @@ panic = "abort"
 lto = true
 debug = true
 split-debuginfo = "packed"
-strip = "debuginfo"
+# strip = "debuginfo"
 rpath = true
