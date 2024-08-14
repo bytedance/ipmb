@@ -40,3 +40,4 @@ jobs:
             ipmb-ffi/*.zip
             target/*.zip
             target/*.pdb
+            target/*.so.dwp

@@ -41,6 +41,7 @@ jobs:
             ipmb-js/*/release/ipmb_js.node
             target/*.zip
             target/*.pdb
+            target/*.so.dwp
 
   dist:
     needs:

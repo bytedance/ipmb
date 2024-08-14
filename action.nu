@@ -31,7 +31,17 @@ export def "build js" [...targets: string] {
     let pwd = ($env.PWD)
 
     for target in $targets {
-        rustup target add $target;
+        let family = if ($target | str contains "darwin") {
+            'darwin'
+        } else if ($target | str contains "windows") {
+            'windows'
+        } else if ($target | str contains "linux") {
+            'linux'
+        } else {
+            continue
+        }
+
+        rustup target add $target
 
         # Build
         (napi build 
@@ -46,19 +56,26 @@ export def "build js" [...targets: string] {
 	    mv ipmb_js.node $"ipmb-js/($target)/release/"
 
         # Pack symbols
-        cd $"target/($target)/release/";
+        cd $"target/($target)/release/"
         for name in [ipmb_js] {
-            let sym = (if ($target | str contains "darwin") {
-                let sym = $"lib($name).dylib.dSYM"
-                pack $"($sym)-v($version)-($target).zip" $"($sym)" 
-                $"($sym)-v($version)-($target).zip"
-            } else {
-                cp $"($name | str replace - _).pdb" $"($name | str replace - _)-v($version)-($target).pdb"
-                $"($name | str replace - _)-v($version)-($target).pdb"
-            })
+            mut sym: any = null
+            match $family {
+                'darwin' => {
+                    $sym = $"lib($name).dylib.dSYM-v($version)-($target).zip"
+                    pack $sym $"lib($name).dylib.dSYM" 
+                }
+                'windows' => {
+                    $sym = $"($name)-v($version)-($target).pdb"
+                    cp $"($name).pdb" $sym
+                }
+                'linux' => {
+                    $sym = $'lib($name)-v($version)-($target).so.dwp'
+                    cp $'lib($name).so.dwp' $sym
+                }
+            }
             mv $sym ../../
         }
-        cd $pwd;
+        cd $pwd
     }
 }
 
@@ -76,7 +93,17 @@ export def "build ffi" [...targets: string] {
     let pwd = ($env.PWD)
 
     for target in $targets {
-        rustup target add $target;
+        let family = if ($target | str contains "darwin") {
+            'darwin'
+        } else if ($target | str contains "windows") {
+            'windows'
+        } else if ($target | str contains "linux") {
+            'linux'
+        } else {
+            continue
+        }
+
+        rustup target add $target
 
         # Build
         cargo build -p ipmb-ffi --target $target --release
@@ -84,24 +111,39 @@ export def "build ffi" [...targets: string] {
         # Pack symbols
         cd $"target/($target)/release/";
         for name in [ipmb_ffi] {
-            let sym = (if ($target | str contains "darwin") {
-                let sym = $"lib($name).dylib.dSYM"
-                pack $"($sym)-v($version)-($target).zip" $"($sym)" 
-                $"($sym)-v($version)-($target).zip"
-            } else {
-                cp $"($name | str replace - _).pdb" $"($name | str replace - _)-v($version)-($target).pdb"
-                $"($name | str replace - _)-v($version)-($target).pdb"
-            })
+            mut sym: any = null
+            match $family {
+                'darwin' => {
+                    $sym = $"lib($name).dylib.dSYM-v($version)-($target).zip"
+                    pack $sym $"lib($name).dylib.dSYM" 
+                }
+                'windows' => {
+                    $sym = $"($name)-v($version)-($target).pdb"
+                    cp $"($name).pdb" $sym
+                }
+                'linux' => {
+                    $sym = $'lib($name)-v($version)-($target).so.dwp'
+                    cp $'lib($name).so.dwp' $sym
+                }
+            }
             mv $sym ../../
         }
-        cd $pwd;
+        cd $pwd
 
         # Pack artifacts
-        let dy = (if ($target | str contains "darwin") {
-            [libipmb_ffi.dylib]
-        } else {
-            [ipmb_ffi.dll ipmb_ffi.dll.lib]
-        })
+        mut dy: any = null
+        match $family {
+            'darwin' => {
+                $dy = [libipmb_ffi.dylib]
+            }
+            'windows' => {
+                $dy = [ipmb_ffi.dll ipmb_ffi.dll.lib]
+            }
+            'linux' => {
+                $dy = [libipmb_ffi.so]
+            }
+        }
+
         for name in $dy {
             cp $"target/($target)/release/($name)" ipmb-ffi/
         }
