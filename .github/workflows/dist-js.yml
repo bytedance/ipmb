@@ -65,6 +65,7 @@ jobs:
           files: |
             target/*.zip
             target/*.pdb
+            target/*.so.dwp
       - run: |
           nu -n -c "use action.nu *; dist js"
         env:
