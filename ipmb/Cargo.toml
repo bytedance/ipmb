@@ -67,7 +67,7 @@ features = [
 ]
 
 [dev-dependencies]
-env_logger = "0.10.0"
+env_logger = "0.11.5"
 num-format = "0.4.0"
 bytesize = "1.1.0"
 
