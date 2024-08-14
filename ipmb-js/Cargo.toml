@@ -1,6 +1,6 @@
 [package]
 name = "ipmb-js"
-version = "0.8.0-20240813"
+version = "0.8.0-20240814"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
