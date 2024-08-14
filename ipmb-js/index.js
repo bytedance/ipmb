@@ -31,6 +31,17 @@ switch (platform) {
     }
     break;
 
+    case 'linux':
+    switch (arch) {
+        case 'x64':
+        module.exports = require('./x86_64-unknown-linux-gnu/release/ipmb_js.node');
+        break;
+
+        default:
+        throw new Error(`Unsupported platform: ${platform} ${arch}`);
+    }
+    break;
+
     default:
     throw new Error(`Unsupported platform: ${platform}-${arch}`);
 }
