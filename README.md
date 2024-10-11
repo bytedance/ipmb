@@ -69,7 +69,8 @@ fn main () {
 ### Identifier
 
 An identifier is a system-level unique name for a bus, and only endpoints on the same bus can communicate with each other. 
-On macOS, it will be used to register the MachPort service, and on Windows, it will be used to create the corresponding named pipe.
+On macOS, it will be used to register the MachPort service, on Windows, it will be used to create the corresponding named pipe, 
+and on Linux, it will be used to bind abstract socket address.
 
 ### Label
 
@@ -127,7 +128,7 @@ fn main() {
 
 ### Object
 
-Object is the kernel object representation, MachPort on macOS, HANDLE on Windows, ipmb supports sending Object as message attachment to other endpoints.
+Object is the kernel object representation, MachPort on macOS, HANDLE on Windows, FD on Linux, ipmb supports sending Object as message attachment to other endpoints.
 
 ```rust
 fn main () {

@@ -1,6 +1,6 @@
 [package]
 name = "ipmb-ffi"
-version = "0.8.0-20240814"
+version = "0.8.0-20241011"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
