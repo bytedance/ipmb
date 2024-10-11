@@ -12,7 +12,7 @@ pub struct MemoryRegistry {
 
 impl MemoryRegistry {
     /// Allocate a `MemoryRegion` from the `MemoryRegistry`, actual size may be larger than min_size.
-    pub fn alloc(&mut self, min_size: usize, tag: Option<&str>) -> MemoryRegion {
+    pub fn alloc(&mut self, min_size: usize, tag: Option<&str>) -> Option<MemoryRegion> {
         self.alloc_inner(min_size, tag, None)
     }
 
@@ -21,7 +21,7 @@ impl MemoryRegistry {
         min_size: usize,
         tag: Option<&str>,
         free: impl FnOnce() + 'static,
-    ) -> MemoryRegion {
+    ) -> Option<MemoryRegion> {
         let free: Box<dyn FnOnce()> = Box::new(free);
         self.alloc_inner(min_size, tag, Some(free))
     }
@@ -31,7 +31,7 @@ impl MemoryRegistry {
         min_size: usize,
         tag: Option<&str>,
         free: Option<Box<dyn FnOnce()>>,
-    ) -> MemoryRegion {
+    ) -> Option<MemoryRegion> {
         let now = Instant::now();
 
         for (_, rs) in self.inner.range_mut(min_size..min_size * 2) {
@@ -44,14 +44,14 @@ impl MemoryRegistry {
 
                     self.maintain_inner(now);
 
-                    return region;
+                    return Some(region);
                 }
             }
         }
 
         self.maintain_inner(now);
 
-        let r = MemoryRegion::new(min_size);
+        let r = MemoryRegion::new(min_size)?;
         self.inner
             .entry(min_size)
             .or_default()
@@ -61,7 +61,7 @@ impl MemoryRegistry {
                 tag: tag.map(ToOwned::to_owned),
                 guard: Guard { free },
             });
-        r
+        Some(r)
     }
 
     fn maintain_inner(&mut self, now: Instant) {

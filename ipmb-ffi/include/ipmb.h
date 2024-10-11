@@ -119,6 +119,8 @@ namespace ipmb {
 
         ~MemoryRegion();
 
+        bool valid();
+
         std::tuple<uint8_t*, intptr_t, Error> map(uintptr_t offset, intptr_t size);
 
         std::tuple<uint32_t, Error> ref_count();

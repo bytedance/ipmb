@@ -7,5 +7,5 @@ fn main() {
 
     drop(region);
 
-    let _region = registry.alloc(0, None);
+    let _region = registry.alloc(0, None).unwrap();
 }

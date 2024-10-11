@@ -1,7 +1,7 @@
 #!/usr/bin/env nu
 
 export def setup [] {
-    npm i -g @napi-rs/cli@2.14.8
+    npm i -g @napi-rs/cli@2.18.4
 }
 
 export def pack [archive: string, ...files: string] {

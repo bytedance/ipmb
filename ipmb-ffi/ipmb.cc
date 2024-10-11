@@ -152,7 +152,7 @@ namespace ipmb {
 
     /// MemoryRegion
     MemoryRegion::MemoryRegion(uintptr_t size) {
-        raw_ = ipmb_ffi::ipmb_memory_region(size);
+        ipmb_ffi::ipmb_memory_region(size, &raw_);
     }
 
     /**
@@ -205,6 +205,10 @@ namespace ipmb {
         if (raw_) {
             ipmb_ffi::ipmb_memory_region_drop(raw_);
         }
+    }
+
+    bool MemoryRegion::valid() {
+        return raw_;
     }
 
     std::tuple<uint8_t*, intptr_t, Error> MemoryRegion::map(uintptr_t offset, intptr_t size) {
@@ -270,8 +274,15 @@ namespace ipmb {
             tag_raw = tag->c_str();
         }
 
-        return std::make_tuple(MemoryRegion(ipmb_ffi::ipmb_memory_registry_alloc(&raw_, min_size, tag_raw)),
+        ipmb_ffi::MemoryRegion region_raw = nullptr;
+        auto r = ipmb_ffi::ipmb_memory_registry_alloc(&raw_, min_size, tag_raw, &region_raw);
+        switch (r) {
+        case ipmb_ffi::ERROR_CODE_SUCCESS:
+            return std::make_tuple(MemoryRegion(region_raw),
                                Error::kSuccess);
+        default:
+            return std::make_tuple(MemoryRegion(), Error::kUnknown);
+        }
     }
 
     extern "C" void free_function(void* free_context) {
@@ -293,11 +304,20 @@ namespace ipmb {
 
         auto f = new std::function<void()>(std::move(free));
 
-        return std::make_tuple(MemoryRegion(ipmb_ffi::ipmb_memory_registry_alloc_with_free(
+        ipmb_ffi::MemoryRegion region_raw = nullptr;
+        auto r = ipmb_ffi::ipmb_memory_registry_alloc_with_free(
                 &raw_, min_size, tag_raw,
                 f,
-                free_function
-        )), Error::kSuccess);
+                free_function,
+                &region_raw
+        );
+        switch (r) {
+        case ipmb_ffi::ERROR_CODE_SUCCESS:
+            return std::make_tuple(MemoryRegion(region_raw),
+                               Error::kSuccess);
+        default:
+            return std::make_tuple(MemoryRegion(), Error::kUnknown);
+        }
     }
 
     Error MemoryRegistry::maintain() {

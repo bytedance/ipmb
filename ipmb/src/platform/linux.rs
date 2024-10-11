@@ -21,15 +21,19 @@ mod io_mul;
 static MAXIMUM_BUF_SIZE: i32 = 64 << 10;
 
 impl MemoryRegion {
-    pub(crate) fn obj_new(size: usize) -> Object {
+    pub(crate) fn obj_new(size: usize) -> Option<Object> {
         unsafe {
             let fd = libc::memfd_create(c"ipmb".as_ptr(), libc::MFD_CLOEXEC);
-            assert_ne!(fd, -1);
+            if fd == -1 {
+                return None;
+            }
             let fd = Object::from_raw(fd);
 
             let r = libc::ftruncate(fd.as_raw(), size as _);
-            assert_ne!(r, -1);
-            fd
+            if r == -1 {
+                return None;
+            }
+            Some(fd)
         }
     }
 }

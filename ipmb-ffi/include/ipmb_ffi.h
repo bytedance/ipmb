@@ -98,15 +98,17 @@ MemoryRegistry ipmb_memory_registry();
 
 void ipmb_memory_registry_drop(MemoryRegistry registry);
 
-MemoryRegion ipmb_memory_registry_alloc(MemoryRegistry *registry,
-                                        uintptr_t min_size,
-                                        const char *tag);
+ErrorCode ipmb_memory_registry_alloc(MemoryRegistry *registry,
+                                     uintptr_t min_size,
+                                     const char *tag,
+                                     MemoryRegion *out_region);
 
-MemoryRegion ipmb_memory_registry_alloc_with_free(MemoryRegistry *registry,
-                                                  uintptr_t min_size,
-                                                  const char *tag,
-                                                  void *free_context,
-                                                  void (*free)(void*));
+ErrorCode ipmb_memory_registry_alloc_with_free(MemoryRegistry *registry,
+                                               uintptr_t min_size,
+                                               const char *tag,
+                                               void *free_context,
+                                               void (*free)(void*),
+                                               MemoryRegion *out_region);
 
 void ipmb_memory_registry_maintain(MemoryRegistry *registry);
 
@@ -138,7 +140,7 @@ MemoryRegion ipmb_message_memory_region_retrieve(Message *message, uintptr_t ind
 /// Get memory region from message without ownership
 MemoryRegion ipmb_message_memory_region_get(Message *message, uintptr_t index);
 
-MemoryRegion ipmb_memory_region(uintptr_t size);
+ErrorCode ipmb_memory_region(uintptr_t size, MemoryRegion *out_region);
 
 void ipmb_memory_region_drop(MemoryRegion region);
 

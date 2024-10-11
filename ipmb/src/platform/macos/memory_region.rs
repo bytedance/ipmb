@@ -16,7 +16,7 @@ const MAP_MEM_NAMED_CREATE: mach_sys::vm_prot_t = 0x020000;
 const VM_INHERIT_NONE: mach_sys::vm_inherit_t = 2;
 
 impl MemoryRegion {
-    pub(crate) fn obj_new(size: usize) -> Object {
+    pub(crate) fn obj_new(size: usize) -> Option<Object> {
         let mut port = 0;
         let mut alloc_size = size as _;
         unsafe {
@@ -28,10 +28,14 @@ impl MemoryRegion {
                 &mut port,
                 mach_sys::MACH_PORT_NULL,
             );
-            assert_eq!(r, mach_sys::KERN_SUCCESS);
+            if r != mach_sys::KERN_SUCCESS {
+                return None;
+            }
             let obj = Object::from_raw(port);
-            assert!(alloc_size >= size as u64);
-            obj
+            if alloc_size < size as u64 {
+                return None;
+            }
+            Some(obj)
         }
     }
 }

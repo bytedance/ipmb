@@ -218,14 +218,20 @@ pub unsafe extern "C" fn ipmb_memory_registry_alloc(
     registry: &mut MemoryRegistry,
     min_size: usize,
     tag: *const c_char,
-) -> MemoryRegion {
+    out_region: *mut MemoryRegion,
+) -> ErrorCode {
     let tag = if tag.is_null() {
         None
     } else {
         Some(CStr::from_ptr(tag).to_string_lossy())
     };
 
-    registry.alloc(min_size, tag.as_deref()).into()
+    if let Some(region) = registry.alloc(min_size, tag.as_deref()) {
+        ptr::write(out_region, region.into());
+        ERROR_CODE_SUCCESS
+    } else {
+        ERROR_CODE_UNKNOWN
+    }
 }
 
 #[no_mangle]
@@ -235,21 +241,27 @@ pub unsafe extern "C" fn ipmb_memory_registry_alloc_with_free(
     tag: *const c_char,
     free_context: *mut c_void,
     free: Option<extern "C" fn(*mut c_void)>,
-) -> MemoryRegion {
+    out_region: *mut MemoryRegion,
+) -> ErrorCode {
     let tag = if tag.is_null() {
         None
     } else {
         Some(CStr::from_ptr(tag).to_string_lossy())
     };
 
-    if let Some(free) = free {
-        registry
-            .alloc_with_free(min_size, tag.as_deref(), move || {
-                free(free_context);
-            })
-            .into()
+    let region = if let Some(free) = free {
+        registry.alloc_with_free(min_size, tag.as_deref(), move || {
+            free(free_context);
+        })
     } else {
-        registry.alloc(min_size, tag.as_deref()).into()
+        registry.alloc(min_size, tag.as_deref())
+    };
+
+    if let Some(region) = region {
+        ptr::write(out_region, region.into());
+        ERROR_CODE_SUCCESS
+    } else {
+        ERROR_CODE_UNKNOWN
     }
 }
 
@@ -368,8 +380,16 @@ pub struct MemoryRegion(*mut c_void);
 opaque_type!(MemoryRegion => ipmb::MemoryRegion);
 
 #[no_mangle]
-pub unsafe extern "C" fn ipmb_memory_region(size: usize) -> MemoryRegion {
-    ipmb::MemoryRegion::new(size).into()
+pub unsafe extern "C" fn ipmb_memory_region(
+    size: usize,
+    out_region: *mut MemoryRegion,
+) -> ErrorCode {
+    if let Some(region) = ipmb::MemoryRegion::new(size) {
+        ptr::write(out_region, region.into());
+        ERROR_CODE_SUCCESS
+    } else {
+        ERROR_CODE_UNKNOWN
+    }
 }
 
 #[allow(unused_variables)]

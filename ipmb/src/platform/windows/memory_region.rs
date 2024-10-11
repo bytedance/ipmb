@@ -6,7 +6,7 @@ use windows::Win32::{
 };
 
 impl MemoryRegion {
-    pub(crate) fn obj_new(size: usize) -> Object {
+    pub(crate) fn obj_new(size: usize) -> Option<Object> {
         unsafe {
             let handle: Foundation::HANDLE = Memory::CreateFileMappingW(
                 Foundation::INVALID_HANDLE_VALUE,
@@ -16,9 +16,9 @@ impl MemoryRegion {
                 size as _,
                 None,
             )
-            .expect("CreateFileMappingW failed");
+            .ok()?;
             let handle = Object::from_raw(handle.0 as _);
-            handle
+            Some(handle)
         }
     }
 }

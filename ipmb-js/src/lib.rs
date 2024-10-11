@@ -140,7 +140,10 @@ impl Sender {
         );
 
         for buf in buffers {
-            let mut region = self.memory_registry.alloc(buf.len(), None);
+            let mut region = self
+                .memory_registry
+                .alloc(buf.len(), None)
+                .ok_or_else(|| Error::new(Status::GenericFailure, "alloc memory region failed"))?;
             unsafe {
                 ptr::copy(
                     buf.as_ptr(),

@@ -60,9 +60,9 @@ impl MemoryRegion {
         Self::HEADER_REFERENCE_COUNT + Self::HEADER_BUFFER_SIZE
     }
 
-    pub fn new(size: usize) -> Self {
+    pub fn new(size: usize) -> Option<Self> {
         let real_size = Self::header_length() + size;
-        let obj = Self::obj_new(real_size);
+        let obj = Self::obj_new(real_size)?;
 
         unsafe {
             let header = MappedRegion::from_object(&obj, 0, Self::header_length())
@@ -75,12 +75,12 @@ impl MemoryRegion {
                 mem::transmute(header.as_slice()[Self::HEADER_REFERENCE_COUNT..].as_ptr());
             buffer_size.store(size as _, Ordering::SeqCst);
 
-            Self {
+            Some(Self {
                 header,
                 buffer_size: size as _,
                 buffer: None,
                 obj,
-            }
+            })
         }
     }
 

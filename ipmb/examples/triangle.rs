@@ -54,7 +54,7 @@ fn main() {
             }),
         );
 
-        let mut region = registry.alloc(16, None);
+        let mut region = registry.alloc(16, None).unwrap();
         region.map(..).unwrap()[0] = 0x2e;
 
         msg.memory_regions.push(region);
@@ -71,7 +71,7 @@ fn main() {
             }),
         );
 
-        msg.memory_regions.push(registry.alloc(32, None));
+        msg.memory_regions.push(registry.alloc(32, None).unwrap());
 
         if let Err(err) = sender.send(msg) {
             log::error!("{:?}", err);
