@@ -29,15 +29,16 @@ ipmb = "0.8"
 ```rust
 use ipmb::label;
 
-fn main () {
+fn main () -> Result<(), Box<dyn Error>> {
     // Join your bus 
     let options = ipmb::Options::new("com.solar", label!("earth"), "");
-    let (sender, receiver) = ipmb::join::<String, String>(options, None).expect("Join com.solar failed");
+    let (sender, receiver) = ipmb::join::<String, String>(options, None)?;
 
     // Receive messages
     while let Ok(message) = receiver.recv(None) {
         log::info!("received: {}", message.payload);
     }
+    Ok(())
 }
 ```
 
@@ -47,10 +48,10 @@ use ipmb::label;
 use std::thread;
 use std::time::Duration;
 
-fn main () {
+fn main () -> Result<(), Box<dyn Error>> {
     // Join your bus 
     let options = ipmb::Options::new("com.solar", label!("moon"), "");
-    let (sender, receiver) = ipmb::join::<String, String>(options, None).expect("Join com.solar failed");
+    let (sender, receiver) = ipmb::join::<String, String>(options, None)?;
 
     loop {
         // Create a message
@@ -58,7 +59,7 @@ fn main () {
         let mut message = ipmb::Message::new(selector, "hello world".to_string());
 
         // Send the message
-        sender.send(message).expect("Send message failed");
+        sender.send(message)?;
         
         thread::sleep(Duration::from_secs(1));
     }
@@ -102,8 +103,9 @@ struct MyMessage {
     bar: bool,
 }
 
-fn main() {
-    let (sender, receiver) = ipmb::join::<MyMessage, MyMessage>(..).unwrap();
+fn main() -> Result<(), Box<dyn Error>> {
+    let (sender, receiver) = ipmb::join::<MyMessage, MyMessage>(..)?;
+    Ok(())
 }
 ```
 
@@ -121,8 +123,9 @@ enum MultipleMessage {
    MyMessage(MyMessage),
 }
 
-fn main() {
-    let (sender, receiver) = ipmb::join::<MultipleMessage, MultipleMessage>(..).unwrap();
+fn main() -> Result<(), Box<dyn Error>> {
+    let (sender, receiver) = ipmb::join::<MultipleMessage, MultipleMessage>(..)?;
+    Ok(())
 }
 ```
 
@@ -143,12 +146,13 @@ fn main () {
 MemoryRegion is a shared memory block, ipmb supports sending MemoryRegion as message attachment to other endpoints without copying.
 
 ```rust
-fn main() {
+fn main() -> Result<(), Box<dyn Error>>{
    let mut message = ipmb::Message::new(..);
    let mut region = ipmb::MemoryRegion::new(16 << 10);
-   let data = region.map(..).expect("Mapping failed");
-   data[0] = 0x10;
+   let view = region.map(..)?;
+   writeln!(view, "Hello")?;
    message.memory_regions.push(region);
+   Ok(())
 }
 ```
 
