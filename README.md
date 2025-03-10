@@ -92,6 +92,11 @@ Selector is used to describe the routing rules of the message, which consists of
 Payload is the body content of a message, and its type can be specified by the type parameter of the join function.
 You can define your own message types:
 
+```toml
+[dependencies]
+type-uuid = "0.1.2"
+```
+
 ```rust
 use serde::{Deserialize, Serialize};
 use type_uuid::TypeUuid;
