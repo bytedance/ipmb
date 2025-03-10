@@ -175,8 +175,8 @@ fn main() {
 
 ## Language Bindings
 
-1. **C/C++**: `ipmb-ffi` provides `ipmb_ffi.h`/`ipmb.h`
-2. **Node.js**: `ipmb-js` provides node package
+1. **C/C++**: `ipmb-ffi` provides `ipmb_ffi.h`/`ipmb.h`, prebuilt libraries can be downloaded [here](https://github.com/xiaopengli89/ipmb/releases)
+2. **Node.js**: `ipmb-js` provides node package ([![npm version](https://img.shields.io/npm/v/ipmb-js.svg?label=ipmb-js)](https://www.npmjs.com/package/ipmb-js))
 
 ## Supported Platforms
 
