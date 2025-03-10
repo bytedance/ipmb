@@ -14,4 +14,4 @@ napi = { version = "2.16.16", features = ["napi4"] }
 ipmb.workspace = true
 
 [build-dependencies]
-napi-build = "2.1.5"
+napi-build = "2.0.1"

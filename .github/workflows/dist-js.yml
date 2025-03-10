@@ -27,7 +27,7 @@ jobs:
         run: |
           nu -n -c "use action.nu *; build js aarch64-apple-darwin x86_64-apple-darwin"
         env:
-          MACOSX_DEPLOYMENT_TARGET: 10.11
+          MACOSX_DEPLOYMENT_TARGET: 10.12
       - if: "matrix.os == 'windows-latest'"
         run: |
           nu -n -c "use action.nu *; rustup override set 1.75.0; build js x86_64-pc-windows-msvc i686-pc-windows-msvc"
