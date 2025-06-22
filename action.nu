@@ -88,7 +88,7 @@ export def "dist js" [] {
     cd ..
 }
 
-export def "build ffi" [...targets: string] {
+export def "build ffi" [--ignore-rust-version ...targets: string] {
     let version = (open ipmb-ffi/Cargo.toml).package.version
     let pwd = ($env.PWD)
 
@@ -106,7 +106,11 @@ export def "build ffi" [...targets: string] {
         rustup target add $target
 
         # Build
-        cargo build -p ipmb-ffi --target $target --release
+        if $ignore_rust_version {
+            cargo build -p ipmb-ffi --target $target --release --ignore-rust-version
+        } else {
+            cargo build -p ipmb-ffi --target $target --release
+        }
 
         # Pack symbols
         cd $"target/($target)/release/";
