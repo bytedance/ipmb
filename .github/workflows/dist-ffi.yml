@@ -33,6 +33,8 @@ jobs:
       - if: "matrix.os == 'windows-latest'"
         run: |
           nu -n -c "use action.nu *; rustup override set 1.75.0; build ffi x86_64-pc-windows-msvc i686-pc-windows-msvc"
+        env:
+          CARGO_IGNORE_RUST_VERSION: 1
       - if: "matrix.os == 'ubuntu-22.04'"
         run: |
           nu -n -c "overlay use action.nu; build ffi x86_64-unknown-linux-gnu"
