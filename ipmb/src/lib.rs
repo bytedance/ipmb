@@ -74,8 +74,10 @@ pub enum SelectorMode {
 }
 
 pub fn decode<'de, T: Deserialize<'de>>(data: &'de [u8]) -> Result<T, Error> {
-    bincode::serde::decode_borrowed_from_slice(data, bincode::config::standard())
-        .map_err(Error::Decode)
+    let (d, _): (T, _) =
+        bincode::serde::borrow_decode_from_slice(data, bincode::config::standard())
+            .map_err(Error::Decode)?;
+    Ok(d)
 }
 
 pub fn encode<T: Serialize>(t: T) -> Result<Vec<u8>, Error> {
