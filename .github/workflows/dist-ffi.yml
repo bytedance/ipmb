@@ -36,7 +36,7 @@ jobs:
           nu -n -c "overlay use action.nu; build ffi x86_64-unknown-linux-gnu"
         env:
           RUSTFLAGS: '-C strip=debuginfo'
-      - uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v2
         with:
           files: |
             ipmb-ffi/*.zip
