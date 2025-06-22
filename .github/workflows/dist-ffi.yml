@@ -13,6 +13,8 @@ jobs:
     strategy:
       matrix:
         os: [ macos-latest, windows-latest, ubuntu-22.04 ]
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v3
       - uses: hustcer/setup-nu@v3
@@ -37,8 +39,6 @@ jobs:
         env:
           RUSTFLAGS: '-C strip=debuginfo'
       - uses: softprops/action-gh-release@v1
-        permissions:
-          contents: write
         with:
           files: |
             ipmb-ffi/*.zip

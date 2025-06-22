@@ -50,6 +50,8 @@ jobs:
       - build
     if: "startsWith(github.ref, 'refs/tags/')"
     runs-on: macos-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v3
       - uses: hustcer/setup-nu@v3
@@ -62,8 +64,6 @@ jobs:
           pattern: ipmb-js-*
           merge-multiple: true
       - uses: softprops/action-gh-release@v1
-        permissions:
-          contents: write
         with:
           files: |
             target/*.zip
