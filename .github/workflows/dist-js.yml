@@ -61,7 +61,9 @@ jobs:
         with:
           pattern: ipmb-js-*
           merge-multiple: true
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v1
+        permissions:
+          contents: write
         with:
           files: |
             target/*.zip
