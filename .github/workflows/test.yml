@@ -15,7 +15,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ macos-latest, windows-latest, ubuntu-22.04 ]
+        os: [ macos-latest, windows-latest, ubuntu-22.04, ubuntu-22.04-arm ]
     steps:
       - uses: actions/checkout@v3
       - uses: hustcer/setup-nu@v3
@@ -35,3 +35,6 @@ jobs:
       - if: "matrix.os == 'ubuntu-22.04'"
         run: |
           nu -n -c "overlay use action.nu; test x86_64-unknown-linux-gnu"
+      - if: "matrix.os == 'ubuntu-22.04-arm'"
+        run: |
+          nu -n -c "overlay use action.nu; test aarch64-unknown-linux-gnu"
