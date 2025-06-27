@@ -135,6 +135,25 @@ impl MemoryRegion {
         Ok(self.buffer.as_mut().unwrap().as_mut())
     }
 
+    /// Safely attempts to get a read-only reference to currently mapped data
+    /// Returns `Some` only if no remapping is needed for requested range
+    pub fn try_map_read(&self, range: impl RangeBounds<usize>) -> Option<&[u8]> {
+        let (offset, size) = util::range_to_offset_size(range);
+        let size = size.unwrap_or_else(|| {
+            usize::try_from(self.buffer_size() - offset as u64).unwrap_or(usize::MAX)
+        });
+
+        if let Some(buffer) = &self.buffer {
+            if offset == buffer.offset && size == buffer.as_slice().len() {
+                Some(buffer.as_slice())
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
+
     pub(crate) fn ref_count_inner(&self, val: i32) -> u32 {
         let rc: &AtomicU32 = unsafe { mem::transmute(self.header.as_slice().as_ptr()) };
 
