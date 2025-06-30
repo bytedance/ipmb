@@ -114,21 +114,16 @@ impl MemoryRegion {
         let size = size.unwrap_or_else(|| {
             usize::try_from(self.buffer_size() - offset as u64).unwrap_or(usize::MAX)
         });
+        let real_offset = Self::header_length() + offset;
 
-        let need_remap = if let Some(buffer) = &self.buffer {
-            if offset != buffer.offset || size != buffer.as_slice().len() {
-                true
-            } else {
-                false
-            }
-        } else {
-            true
-        };
+        let need_remap = self
+            .buffer
+            .as_ref()
+            .map(|buffer| real_offset != buffer.offset || size != buffer.as_slice().len())
+            .unwrap_or(true);
 
         if need_remap {
-            let buffer = unsafe {
-                MappedRegion::from_object(&self.obj, Self::header_length() + offset, size)?
-            };
+            let buffer = unsafe { MappedRegion::from_object(&self.obj, real_offset, size)? };
             self.buffer = Some(buffer);
         }
 
