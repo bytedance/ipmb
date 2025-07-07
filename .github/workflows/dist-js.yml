@@ -25,12 +25,12 @@ jobs:
           key: ${{ matrix.target }}
       - if: "matrix.os == 'macos-latest'"
         run: |
-          nu -n -c "use action.nu *; build js aarch64-apple-darwin x86_64-apple-darwin"
+          nu -n -c "overlay use action.nu; build js aarch64-apple-darwin x86_64-apple-darwin"
         env:
           MACOSX_DEPLOYMENT_TARGET: 10.12
       - if: "matrix.os == 'windows-latest'"
         run: |
-          nu -n -c "use action.nu *; build js x86_64-pc-windows-msvc i686-pc-windows-msvc"
+          nu -n -c "overlay use action.nu; build js x86_64-pc-windows-msvc i686-pc-windows-msvc"
       - if: "matrix.os == 'ubuntu-22.04'"
         run: |
           sudo snap install zig --classic --beta
@@ -73,6 +73,6 @@ jobs:
             target/*.pdb
             target/*.so.dwp
       - run: |
-          nu -n -c "use action.nu *; dist js"
+          nu -n -c "overlay use action.nu; dist js"
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

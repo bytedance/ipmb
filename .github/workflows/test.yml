@@ -28,10 +28,10 @@ jobs:
           key: ${{ matrix.target }}
       - if: "matrix.os == 'macos-latest'"
         run: |
-          nu -n -c "use action.nu *; test x86_64-apple-darwin"
+          nu -n -c "overlay use action.nu; test x86_64-apple-darwin"
       - if: "matrix.os == 'windows-latest'"
         run: |
-          nu -n -c "use action.nu *; test x86_64-pc-windows-msvc"
+          nu -n -c "overlay use action.nu; test x86_64-pc-windows-msvc"
       - if: "matrix.os == 'ubuntu-22.04'"
         run: |
           nu -n -c "overlay use action.nu; test x86_64-unknown-linux-gnu"
