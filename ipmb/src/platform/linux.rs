@@ -380,7 +380,7 @@ impl<T: MessageBox> message::Message<T> {
             let v = version();
             ptr::write(
                 version_ptr,
-                mem::transmute([0xFF, v.major(), v.minor(), v.patch()]),
+                u32::from_ne_bytes([0xFF, v.major(), v.minor(), v.patch()]),
             );
 
             let selector_size_ptr = version_ptr.offset(1);

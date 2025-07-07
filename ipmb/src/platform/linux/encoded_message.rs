@@ -93,7 +93,7 @@ impl EncodedMessage {
             }
 
             let version_ptr = iov_data.as_ptr() as *const u32;
-            let [magic, major, minor, patch]: [u8; 4] = mem::transmute(*version_ptr);
+            let [magic, major, minor, patch]: [u8; 4] = u32::to_ne_bytes(*version_ptr);
             if magic != 0xFF {
                 return Err(Error::VersionMismatch(Version((0, 0, 0)), None));
             }
