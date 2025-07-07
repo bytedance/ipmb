@@ -35,11 +35,11 @@ jobs:
           nu -n -c "use action.nu *; rustup override set 1.75.0; build ffi --ignore-rust-version x86_64-pc-windows-msvc i686-pc-windows-msvc"
       - if: "matrix.os == 'ubuntu-22.04'"
         run: |
-          snap install zig --classic
+          sudo snap install zig --classic
           nu -n -c "overlay use action.nu; build ffi x86_64-unknown-linux-gnu"
       - if: "matrix.os == 'ubuntu-22.04-arm'"
         run: |
-          snap install zig --classic
+          sudo snap install zig --classic
           nu -n -c "overlay use action.nu; build ffi aarch64-unknown-linux-gnu"
       - uses: softprops/action-gh-release@v1
         with:
