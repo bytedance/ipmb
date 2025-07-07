@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: hustcer/setup-nu@v3
         with:
-          version: '0.95.0'
+          version: '0.103.0'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: Swatinem/rust-cache@v2
