@@ -44,6 +44,11 @@ export def "build js" [...targets: string] {
         rustup target add $target
 
         # Build
+        mut args = []
+        if ($target | str contains "linux") {
+            $args = $args | append [--zig --zig-abi-suffix=2.31]
+        }
+
         (napi build 
             -p ipmb-js 
             --cargo-cwd ipmb-js 
@@ -51,6 +56,7 @@ export def "build js" [...targets: string] {
             --dts ipmb-js/index.d.ts 
             --target $target 
             --release
+            ...$args
         )
         mkdir $"ipmb-js/($target)/release/"
 	    mv ipmb_js.node $"ipmb-js/($target)/release/"
@@ -106,10 +112,15 @@ export def "build ffi" [--ignore-rust-version ...targets: string] {
         rustup target add $target
 
         # Build
+        mut args = [-p ipmb-ffi --release]
         if $ignore_rust_version {
-            cargo build -p ipmb-ffi --target $target --release --ignore-rust-version
+            $args = $args | append "--ignore-rust-version"
+        }
+
+        if ($target | str contains "linux") {
+            cargo zigbuild --target $"($target).2.31" ...$args
         } else {
-            cargo build -p ipmb-ffi --target $target --release
+            cargo build --target $target ...$args
         }
 
         # Pack symbols
