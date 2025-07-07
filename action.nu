@@ -162,16 +162,16 @@ export def "build ffi" [--ignore-rust-version ...targets: string] {
 
 export def "demo cc" [] {
     cargo build -p ipmb-ffi
-    cmake .
-    cmake --build . --target cc_client
-	./target/debug/cc_client
+    cmake -B build -S .
+    cmake --build build --target cc_client
+	./build/cc_client
 }
 
 export def "demo cc plus" [] {
     cargo build -p ipmb-ffi
-    cmake .
-    cmake --build . --target cc_client_plus
-	./target/debug/cc_client_plus
+    cmake -B build -S .
+    cmake --build build --target cc_client_plus
+	./build/cc_client
 }
 
 export def "demo js" [] {

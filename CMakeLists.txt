@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.25)
 project(ipmb)
 
 set(CMAKE_CXX_STANDARD 14)
-set(EXECUTABLE_OUTPUT_PATH "target/debug")
 
 include_directories(ipmb-ffi/include)
 

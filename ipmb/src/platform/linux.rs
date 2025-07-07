@@ -7,7 +7,7 @@ use fd::Local;
 pub use fd::{Fd, Remote};
 pub(crate) use io_mul::IoMultiplexing;
 use std::{
-    io, mem,
+    ffi, io, mem,
     os::fd::RawFd,
     ptr, slice,
     sync::{mpsc, Arc, Once},
@@ -80,6 +80,7 @@ pub(crate) fn page_mask() -> usize {
 
 // we use abstract socket address
 fn identifier_to_socket_addr(identifier: &str) -> libc::sockaddr_un {
+    let identifier = ffi::CString::new(identifier).unwrap();
     let mut addr = libc::sockaddr_un {
         sun_family: libc::AF_UNIX as _,
         sun_path: [0; 108],
