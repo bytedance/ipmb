@@ -20,11 +20,11 @@ path = "ipmb-derive"
 
 [profile.dev]
 panic = "abort"
+debug = "line-tables-only"
 
 [profile.release]
 panic = "abort"
 lto = true
 debug = true
 split-debuginfo = "packed"
-strip = "symbols"
 rpath = true
