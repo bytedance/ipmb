@@ -329,7 +329,7 @@ impl<T: MessageBox> Message<T> {
             let version_ptr = descriptor_ptr as *mut u32;
             {
                 let v = version();
-                *version_ptr = mem::transmute([0xFF, v.major(), v.minor(), v.patch()]);
+                *version_ptr = u32::from_ne_bytes([0xFF, v.major(), v.minor(), v.patch()]);
             }
 
             let selector_size_ptr = version_ptr.offset(1);
@@ -437,7 +437,7 @@ impl EncodedMessage {
 
             // Version
             let version_ptr = descriptor_ptr as *mut u32;
-            let [magic, major, minor, patch]: [u8; 4] = mem::transmute(*version_ptr);
+            let [magic, major, minor, patch]: [u8; 4] = u32::to_ne_bytes(*version_ptr);
             let remote_version = Version((major, minor, patch));
 
             if magic != 0xFF {
