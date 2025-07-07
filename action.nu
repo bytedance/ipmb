@@ -113,16 +113,17 @@ export def "build ffi" [--ignore-rust-version ...targets: string] {
         rustup target add $target
 
         # Build
-        mut args = [-p ipmb-ffi --release]
-        if $ignore_rust_version {
-            $args = $args | append "--ignore-rust-version"
-        }
+        let args = [-p ipmb-ffi --release]
 
         if ($target | str contains "linux") {
             cargo install cargo-zigbuild
             cargo zigbuild --target $"($target).2.31" ...$args
         } else {
-            cargo build --target $target ...$args
+            if $ignore_rust_version {
+                cargo build --target $target --ignore-rust-version ...$args
+            } else {
+                cargo build --target $target ...$args
+            }
         }
 
         # Pack symbols
