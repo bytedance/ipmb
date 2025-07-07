@@ -47,6 +47,7 @@ export def "build js" [...targets: string] {
         mut args = []
         if ($target | str contains "linux") {
             $args = $args | append [--zig --zig-abi-suffix=2.31]
+            cargo install cargo-zigbuild
         }
 
         (napi build 
@@ -118,6 +119,7 @@ export def "build ffi" [--ignore-rust-version ...targets: string] {
         }
 
         if ($target | str contains "linux") {
+            cargo install cargo-zigbuild
             cargo zigbuild --target $"($target).2.31" ...$args
         } else {
             cargo build --target $target ...$args
