@@ -348,7 +348,7 @@ dependencies = [
 
 [[package]]
 name = "ipmb"
-version = "0.8.1"
+version = "0.8.2"
 dependencies = [
  "bincode",
  "bytesize",
@@ -381,7 +381,7 @@ dependencies = [
 
 [[package]]
 name = "ipmb-ffi"
-version = "0.8.1"
+version = "0.8.2"
 dependencies = [
  "cbindgen",
  "ipmb",
@@ -389,7 +389,7 @@ dependencies = [
 
 [[package]]
 name = "ipmb-js"
-version = "0.8.1"
+version = "0.8.2"
 dependencies = [
  "ipmb",
  "napi",

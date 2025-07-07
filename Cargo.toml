@@ -11,7 +11,7 @@ members = [
 rust-version = "1.65"
 
 [workspace.dependencies.ipmb]
-version = "0.8.1"
+version = "0.8.2"
 path = "ipmb"
 
 [workspace.dependencies.ipmb-derive]
@@ -26,5 +26,5 @@ panic = "abort"
 lto = true
 debug = true
 split-debuginfo = "packed"
-# strip = "debuginfo"
+strip = "symbols"
 rpath = true

@@ -1,6 +1,6 @@
 {
   "name": "ipmb-js",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "ipmb-js",
   "keywords": [
     "ipmb",
@@ -22,7 +22,8 @@
     "x86_64-apple-darwin/release/ipmb_js.node",
     "x86_64-pc-windows-msvc/release/ipmb_js.node",
     "i686-pc-windows-msvc/release/ipmb_js.node",
-    "x86_64-unknown-linux-gnu/release/ipmb_js.node"
+    "x86_64-unknown-linux-gnu/release/ipmb_js.node",
+    "aarch64-unknown-linux-gnu/release/ipmb_js.node"
   ],
   "napi": {
     "name": "ipmb_js"

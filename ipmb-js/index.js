@@ -33,6 +33,10 @@ switch (platform) {
 
     case 'linux':
     switch (arch) {
+        case 'arm64':
+        module.exports = require('./aarch64-unknown-linux-gnu/release/ipmb_js.node');
+        break;
+
         case 'x64':
         module.exports = require('./x86_64-unknown-linux-gnu/release/ipmb_js.node');
         break;
