@@ -4,17 +4,11 @@ export def setup [] {
     npm i -g @napi-rs/cli@2.18.4
 }
 
-export def pack [archive: string, ...files: string] {
-    if (sys host).name == "Windows" {
-        let command = $"Compress-Archive -Path ($files | str join ', ') -DestinationPath ($archive)"
-
-        if (which pwsh | is-empty) {
-            powershell -Command $command
-        } else {
-            pwsh -Command $command
-        }
+export def pack [dest: string ...files: string] {
+    if $nu.os-info.name == "windows" {
+        tar.exe -a -cf $dest ...$files
     } else {
-        ^zip -r $archive ...$files
+        ^zip -r $dest ...$files
     }
 }
 
