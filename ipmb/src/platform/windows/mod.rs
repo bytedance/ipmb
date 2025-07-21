@@ -61,6 +61,11 @@ pub(crate) fn look_up(
     token: String,
     im: Arc<IoMultiplexing>,
 ) -> Result<(IoHub, Remote, EndpointID), Error> {
+    // A empty identifier will successfully open the pipe , but fail with `GetNamedPipeServerProcessId`
+    if identifier.is_empty() {
+        return Err(Error::PermissonDenied);
+    }
+
     unsafe {
         let identifier: HSTRING = format!("\\\\.\\pipe\\{}", identifier).into();
 
