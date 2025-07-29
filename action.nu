@@ -40,7 +40,7 @@ export def "build js" [...targets: string] {
         # Build
         mut args = []
         if ($target | str contains "linux") {
-            $args = $args | append [--zig --zig-abi-suffix=2.31]
+            $args = $args | append [--zig --zig-abi-suffix=2.27]
             cargo install cargo-zigbuild
         }
 
@@ -114,7 +114,7 @@ export def "build ffi" [--ignore-rust-version ...targets: string] {
 
         if ($target | str contains "linux") {
             cargo install cargo-zigbuild
-            cargo zigbuild --target $"($target).2.31" ...$args
+            cargo zigbuild --target $"($target).2.27" ...$args
         } else {
             cargo build --target $target ...$args
         }
