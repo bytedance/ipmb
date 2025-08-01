@@ -6,7 +6,7 @@ export def setup [] {
 
 export def pack [dest: string ...files: string] {
     if $nu.os-info.name == "windows" {
-        tar.exe -a -cf $dest ...$files
+        run-external C:\Windows\System32\tar.exe "-a" "-cf" $dest ...$files
     } else {
         ^zip -r $dest ...$files
     }
