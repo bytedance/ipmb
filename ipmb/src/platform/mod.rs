@@ -3,7 +3,7 @@ use std::{
     mem,
     ops::RangeBounds,
     slice,
-    sync::atomic::{AtomicU32, AtomicU64, Ordering},
+    sync::atomic::{AtomicU32, Ordering},
 };
 
 #[cfg(target_os = "macos")]
@@ -65,15 +65,18 @@ impl MemoryRegion {
         let obj = Self::obj_new(real_size)?;
 
         unsafe {
-            let header = MappedRegion::from_object(&obj, 0, Self::header_length())
+            let mut header = MappedRegion::from_object(&obj, 0, Self::header_length())
                 .expect("MappedRegion::from_object");
 
             let rc: &AtomicU32 = mem::transmute(header.as_slice().as_ptr());
             rc.store(1, Ordering::SeqCst);
 
-            let buffer_size: &AtomicU64 =
-                mem::transmute(header.as_slice()[Self::HEADER_REFERENCE_COUNT..].as_ptr());
-            buffer_size.store(size as _, Ordering::SeqCst);
+            header
+                .as_mut()
+                .as_mut_ptr()
+                .add(Self::HEADER_REFERENCE_COUNT)
+                .cast::<u64>()
+                .write_unaligned(size as _);
 
             Some(Self {
                 header,
@@ -89,9 +92,12 @@ impl MemoryRegion {
             let header = MappedRegion::from_object(&obj, 0, Self::header_length())
                 .expect("MappedRegion::from_object");
 
-            let buffer_size: &AtomicU64 =
-                mem::transmute(header.as_slice()[Self::HEADER_REFERENCE_COUNT..].as_ptr());
-            let buffer_size = buffer_size.load(Ordering::SeqCst);
+            let buffer_size = header
+                .as_slice()
+                .as_ptr()
+                .add(Self::HEADER_REFERENCE_COUNT)
+                .cast::<u64>()
+                .read_unaligned();
 
             Self {
                 header,
