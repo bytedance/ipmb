@@ -159,7 +159,7 @@ export def "build ffi" [--ignore-rust-version ...targets: string] {
             cp $"target/($target)/release/($name)" ipmb-ffi/
         }
         cd ipmb-ffi
-        pack $"ipmb-ffi-v($version)-($target).zip" include/ ipmb.cc ...$dy 
+        pack $"ipmb-ffi-v($version)-($target).zip" include ipmb.cc ...$dy 
         for name in $dy {
             rm $name 
         }
