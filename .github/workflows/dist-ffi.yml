@@ -37,13 +37,13 @@ jobs:
         run: |
           sudo snap install zig --classic --beta
           nu -n -c "overlay use action.nu; build ffi x86_64-unknown-linux-gnu"
-        env:
+        # env:
           # RUSTFLAGS: '-C strip=debuginfo'
       - if: "matrix.os == 'ubuntu-22.04-arm'"
         run: |
           sudo snap install zig --classic --beta
           nu -n -c "overlay use action.nu; build ffi aarch64-unknown-linux-gnu"
-        env:
+        # env:
           # RUSTFLAGS: '-C strip=debuginfo'
       - uses: softprops/action-gh-release@v1
         with:
