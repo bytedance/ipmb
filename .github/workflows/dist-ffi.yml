@@ -30,6 +30,7 @@ jobs:
           nu -n -c "overlay use action.nu; build ffi aarch64-apple-darwin x86_64-apple-darwin"
         env:
           MACOSX_DEPLOYMENT_TARGET: 10.12
+          RUSTFLAGS: '-C rpath'
       - if: "matrix.os == 'windows-latest'"
         run: |
           nu -n -c "overlay use action.nu; rustup override set 1.75.0; build ffi --ignore-rust-version x86_64-pc-windows-msvc i686-pc-windows-msvc"

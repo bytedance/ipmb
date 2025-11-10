@@ -27,4 +27,3 @@ panic = "abort"
 lto = true
 debug = true
 split-debuginfo = "packed"
-rpath = true
