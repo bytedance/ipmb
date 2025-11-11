@@ -57,7 +57,8 @@ impl EncodedMessage {
                 &mut hdr,
                 libc::MSG_PEEK | libc::MSG_TRUNC | libc::MSG_CTRUNC,
             );
-            if r < 0 {
+            // When remote disconnected, recvmsg returns 0
+            if r <= 0 {
                 return Err(Error::Disconnect);
             }
 
@@ -78,7 +79,8 @@ impl EncodedMessage {
             hdr.msg_flags = 0;
 
             r = libc::recvmsg(local.0.as_raw(), &mut hdr, 0);
-            if r < 0
+            // When remote disconnected, recvmsg returns 0
+            if r <= 0
                 || (hdr.msg_flags & libc::MSG_TRUNC == libc::MSG_TRUNC)
                 || (hdr.msg_flags & libc::MSG_CTRUNC == libc::MSG_CTRUNC)
             {
