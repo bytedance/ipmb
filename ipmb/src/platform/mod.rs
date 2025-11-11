@@ -1,6 +1,6 @@
 use crate::{util, Error};
 use std::{
-    mem,
+    io, mem,
     ops::RangeBounds,
     slice,
     sync::atomic::{AtomicU32, Ordering},
@@ -46,9 +46,9 @@ impl Drop for MemoryRegion {
     }
 }
 
-impl Clone for MemoryRegion {
-    fn clone(&self) -> Self {
-        Self::from_object(self.object().clone())
+impl MemoryRegion {
+    pub fn clone(&self) -> io::Result<Self> {
+        self.object().clone().map(Self::from_object)
     }
 }
 

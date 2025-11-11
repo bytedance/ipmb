@@ -125,7 +125,7 @@ namespace ipmb {
 
         std::tuple<uint32_t, Error> ref_count();
 
-        MemoryRegion clone();
+        std::tuple<MemoryRegion, Error> clone();
 
     private:
         ipmb_ffi::MemoryRegion raw_ = nullptr;

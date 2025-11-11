@@ -155,32 +155,19 @@ namespace ipmb {
         ipmb_ffi::ipmb_memory_region(size, &raw_);
     }
 
-    /**
-    MemoryRegion::MemoryRegion(const MemoryRegion& other) {
-        if (other.raw_) {
-            raw_ = ipmb_ffi::ipmb_memory_region_clone(&other.raw_);
-        }
-    }
-
-    MemoryRegion& MemoryRegion::operator=(const MemoryRegion& other) {
-        if (raw_) {
-            ipmb_ffi::ipmb_memory_region_drop(raw_);
-            raw_ = nullptr;
-        }
-
-        if (other.raw_) {
-            raw_ = ipmb_ffi::ipmb_memory_region_clone(&other.raw_);
-        }
-
-        return *this;
-    }
-    */
-
-    MemoryRegion MemoryRegion::clone() {
+    std::tuple<MemoryRegion, Error> MemoryRegion::clone() {
         if (!raw_) {
-            return MemoryRegion();
+            return std::make_tuple(MemoryRegion(), Error::kUnknown);
         }
-        return MemoryRegion(ipmb_ffi::ipmb_memory_region_clone(&raw_));
+        ipmb_ffi::MemoryRegion region_raw = nullptr;
+        auto r = ipmb_ffi::ipmb_memory_region_clone(&raw_, &region_raw);
+        switch (r) {
+        case ipmb_ffi::ERROR_CODE_SUCCESS:
+            return std::make_tuple(MemoryRegion(region_raw),
+                               Error::kSuccess);
+        default:
+            return std::make_tuple(MemoryRegion(), Error::kUnknown);
+        }
     }
 
     MemoryRegion::MemoryRegion(MemoryRegion&& other) noexcept {

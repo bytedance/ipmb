@@ -39,7 +39,7 @@ impl MemoryRegistry {
                 if r.region.ref_count_inner(0) == 1 && tag == r.tag.as_deref() {
                     r.last_alloc = now;
 
-                    let region = r.region.clone();
+                    let region = r.region.clone().ok()?;
                     r.guard = Guard { free };
 
                     self.maintain_inner(now);
@@ -56,7 +56,7 @@ impl MemoryRegistry {
             .entry(min_size)
             .or_default()
             .push(MemoryRegionEntry {
-                region: r.clone(),
+                region: r.clone().ok()?,
                 last_alloc: now,
                 tag: tag.map(ToOwned::to_owned),
                 guard: Guard { free },

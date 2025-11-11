@@ -155,7 +155,7 @@ uint32_t ipmb_memory_region_ref_count(const MemoryRegion *region);
 /// Clone a new MemoryRegion and share the underlying kernel object.
 /// # Safety
 /// - region must be a valid MemoryRegion.
-MemoryRegion ipmb_memory_region_clone(const MemoryRegion *region);
+ErrorCode ipmb_memory_region_clone(const MemoryRegion *region, MemoryRegion *out_region);
 
 Label ipmb_label();
 

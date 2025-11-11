@@ -1,15 +1,15 @@
 use std::{
     fmt::Debug,
-    mem,
+    io, mem,
     os::fd::{self, AsRawFd, FromRawFd, IntoRawFd},
     sync::{Mutex, MutexGuard},
 };
 
 pub struct Fd(fd::OwnedFd);
 
-impl Clone for Fd {
-    fn clone(&self) -> Self {
-        Self(self.0.try_clone().expect("try clone fd"))
+impl Fd {
+    pub fn clone(&self) -> io::Result<Self> {
+        self.0.try_clone().map(Self)
     }
 }
 

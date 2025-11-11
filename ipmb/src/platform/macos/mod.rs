@@ -9,7 +9,7 @@ pub(crate) use memory_region::page_mask;
 use std::{
     ffi::CString,
     hash::Hash,
-    mem,
+    io, mem,
     os::unix::prelude::{AsRawFd, FromRawFd, OwnedFd},
     ptr, slice,
     sync::{
@@ -86,7 +86,7 @@ pub(crate) fn look_up(
                         label,
                     },
                 );
-                msg.objects.push(local.clone());
+                msg.objects.push(local.clone()?);
                 let mut encoded_msg = msg.into_encoded();
                 encoded_msg.send(&remote)?;
 
@@ -607,8 +607,8 @@ impl MachPort {
     }
 }
 
-impl Clone for MachPort {
-    fn clone(&self) -> Self {
+impl MachPort {
+    pub fn clone(&self) -> io::Result<Self> {
         unsafe {
             let r = mach_sys::mach_port_mod_refs(
                 mach_sys::mach_task_self(),
@@ -616,8 +616,10 @@ impl Clone for MachPort {
                 mach_sys::MACH_PORT_RIGHT_SEND,
                 1,
             );
-            assert_eq!(r, mach_sys::KERN_SUCCESS);
-            Self::from_raw(self.as_raw())
+            if r != mach_sys::KERN_SUCCESS {
+                return Err(io::Error::other("mach_port_mod_refs"));
+            }
+            Ok(Self::from_raw(self.as_raw()))
         }
     }
 }

@@ -427,8 +427,16 @@ pub unsafe extern "C" fn ipmb_memory_region_ref_count(region: &MemoryRegion) -> 
 /// # Safety
 /// - region must be a valid MemoryRegion.
 #[no_mangle]
-pub unsafe extern "C" fn ipmb_memory_region_clone(region: &MemoryRegion) -> MemoryRegion {
-    (*region).clone().into()
+pub unsafe extern "C" fn ipmb_memory_region_clone(
+    region: &MemoryRegion,
+    out_region: *mut MemoryRegion,
+) -> ErrorCode {
+    let Ok(region1) = (*region).clone() else {
+        return ERROR_CODE_UNKNOWN;
+    };
+
+    ptr::write(out_region, region1.into());
+    return ERROR_CODE_SUCCESS;
 }
 
 /// Label

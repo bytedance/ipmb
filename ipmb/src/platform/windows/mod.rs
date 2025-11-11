@@ -8,7 +8,7 @@ use crate::{
 pub(crate) use memory_region::page_mask;
 use security::SecurityAttr;
 use std::{
-    mem,
+    io, mem,
     mem::MaybeUninit,
     ops::Deref,
     os::windows::prelude::{
@@ -679,9 +679,9 @@ impl PartialEq for Handle {
     }
 }
 
-impl Clone for Handle {
-    fn clone(&self) -> Self {
-        Self(self.0.try_clone().expect("Clone handle failed"))
+impl Handle {
+    pub fn clone(&self) -> io::Result<Self> {
+        self.0.try_clone().map(Self)
     }
 }
 
