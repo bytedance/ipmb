@@ -374,7 +374,7 @@ impl<T: MessageBox> message::Message<T> {
         let payload_bytes = self.payload.encode().unwrap();
         size += payload_bytes.len().align4();
 
-        let mut iov_data: Vec<u8> = alloc_buffer(size);
+        let mut iov_data: Vec<u8> = alloc_buffer::<u32>(size);
         let payload_data = unsafe {
             let version_ptr = iov_data.as_mut_ptr() as *mut u32;
             let v = version();
@@ -403,7 +403,7 @@ impl<T: MessageBox> message::Message<T> {
         let control_len: u32 =
             ((self.objects.len() + self.memory_regions.len()) * mem::size_of::<RawFd>()) as _;
         size = unsafe { libc::CMSG_SPACE(control_len) } as _;
-        let mut control_data: Vec<u8> = alloc_buffer(size);
+        let mut control_data: Vec<u8> = alloc_buffer::<usize>(size);
         unsafe {
             let control_ptr = control_data.as_mut_ptr() as *mut libc::cmsghdr;
             let control_ref = &mut *control_ptr;
@@ -439,8 +439,18 @@ impl<T: MessageBox> message::Message<T> {
     }
 }
 
-fn alloc_buffer<T>(size: usize) -> Vec<T> {
-    let mut buf = Vec::with_capacity(size);
-    unsafe { buf.set_len(buf.capacity()) };
+fn alloc_buffer<T>(size: usize) -> Vec<u8> {
+    let mut buffer_t_size = size / mem::size_of::<T>();
+    if size % mem::size_of::<T>() != 0 {
+        buffer_t_size += 1;
+    }
+    let mut buf_t = Vec::<T>::with_capacity(buffer_t_size);
+
+    let buffer_size = buffer_t_size * mem::size_of::<T>();
+    let buf =
+        unsafe { Vec::from_raw_parts(buf_t.as_mut_ptr().cast::<u8>(), buffer_size, buffer_size) };
+
+    mem::forget(buf_t);
+
     buf
 }

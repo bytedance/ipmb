@@ -52,22 +52,26 @@ impl EncodedMessage {
                 msg_flags: 0,
             };
 
-            let mut r = libc::recvmsg(local.0.as_raw(), &mut hdr, libc::MSG_PEEK);
+            let mut r = libc::recvmsg(
+                local.0.as_raw(),
+                &mut hdr,
+                libc::MSG_PEEK | libc::MSG_TRUNC | libc::MSG_CTRUNC,
+            );
             if r < 0 {
                 return Err(Error::Disconnect);
             }
 
             let meta = Meta {
                 iov_len: r as _,
-                control_len: hdr.msg_controllen as _,
+                control_len: 32, // TODO: How to peek this?
             };
 
             // recv payload
-            let mut iov_data: Vec<u8> = super::alloc_buffer(meta.iov_len as _);
+            let mut iov_data: Vec<u8> = super::alloc_buffer::<u32>(meta.iov_len as _);
             iov.iov_base = iov_data.as_mut_ptr() as _;
             iov.iov_len = iov_data.len();
 
-            let mut control_data: Vec<u8> = super::alloc_buffer(meta.control_len as _);
+            let mut control_data: Vec<u8> = super::alloc_buffer::<usize>(meta.control_len as _);
             hdr.msg_control = control_data.as_mut_ptr() as _;
             hdr.msg_controllen = control_data.len();
 
