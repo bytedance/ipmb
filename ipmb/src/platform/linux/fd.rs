@@ -40,7 +40,7 @@ impl Remote {
         }
     }
 
-    pub fn lock(&self) -> MutexGuard<Fd> {
+    pub fn lock(&self) -> MutexGuard<'_, Fd> {
         self.fd.lock().unwrap()
     }
 

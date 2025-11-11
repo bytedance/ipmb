@@ -36,12 +36,10 @@ impl EncodedMessage {
     // mutable reference ensure no other references
     pub fn from_local(local: &mut Local) -> Result<Self, Error> {
         unsafe {
-            // recv meta
-            let mut meta = Meta::default();
-
+            // peek meta
             let mut iov = libc::iovec {
-                iov_base: &mut meta as *mut _ as _,
-                iov_len: mem::size_of_val(&meta),
+                iov_base: ptr::null_mut(),
+                iov_len: 0,
             };
 
             let mut hdr = libc::msghdr {
@@ -54,10 +52,15 @@ impl EncodedMessage {
                 msg_flags: 0,
             };
 
-            let mut r = libc::recvmsg(local.0.as_raw(), &mut hdr, 0);
-            if r < 1 || (hdr.msg_flags & libc::MSG_TRUNC == libc::MSG_TRUNC) {
+            let mut r = libc::recvmsg(local.0.as_raw(), &mut hdr, libc::MSG_PEEK);
+            if r < 0 {
                 return Err(Error::Disconnect);
             }
+
+            let meta = Meta {
+                iov_len: r as _,
+                control_len: hdr.msg_controllen as _,
+            };
 
             // recv payload
             let mut iov_data: Vec<u8> = super::alloc_buffer(meta.iov_len as _);
@@ -71,7 +74,10 @@ impl EncodedMessage {
             hdr.msg_flags = 0;
 
             r = libc::recvmsg(local.0.as_raw(), &mut hdr, 0);
-            if r < 1 || (hdr.msg_flags & libc::MSG_TRUNC == libc::MSG_TRUNC) {
+            if r < 0
+                || (hdr.msg_flags & libc::MSG_TRUNC == libc::MSG_TRUNC)
+                || (hdr.msg_flags & libc::MSG_CTRUNC == libc::MSG_CTRUNC)
+            {
                 return Err(Error::Disconnect);
             }
 
@@ -137,15 +143,9 @@ impl EncodedMessage {
     }
 
     pub fn send(&mut self, remote: &Remote) -> Result<(), Error> {
-        // send meta
-        let mut meta = Meta {
-            iov_len: self.iov_data.len() as u32,
-            control_len: self.control_data.len() as u32,
-        };
-
         let mut iov = libc::iovec {
-            iov_base: &mut meta as *mut _ as _,
-            iov_len: mem::size_of_val(&meta),
+            iov_base: ptr::null_mut(),
+            iov_len: 0,
         };
         let mut hdr = libc::msghdr {
             msg_name: ptr::null_mut(),
@@ -156,13 +156,6 @@ impl EncodedMessage {
             msg_controllen: 0,
             msg_flags: 0,
         };
-
-        let remote_guard = remote.lock();
-
-        let mut r = unsafe { libc::sendmsg(remote_guard.as_raw(), &hdr, 0) };
-        if r == -1 {
-            return Err(Error::Disconnect);
-        }
 
         // send payload
         iov.iov_base = self.iov_data.as_mut_ptr() as _;
@@ -176,7 +169,8 @@ impl EncodedMessage {
             r.ref_count_inner(1);
         }
 
-        r = unsafe { libc::sendmsg(remote_guard.as_raw(), &hdr, 0) };
+        let remote_guard = remote.lock();
+        let r = unsafe { libc::sendmsg(remote_guard.as_raw(), &hdr, 0) };
         if r == -1 {
             for r in self.memory_regions.iter() {
                 r.ref_count_inner(-1);
@@ -189,8 +183,6 @@ impl EncodedMessage {
     }
 }
 
-#[derive(Default)]
-#[repr(C)]
 struct Meta {
     iov_len: u32,
     control_len: u32,
