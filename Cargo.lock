@@ -348,7 +348,7 @@ dependencies = [
 
 [[package]]
 name = "ipmb"
-version = "0.8.4"
+version = "0.8.5-20251204"
 dependencies = [
  "bincode",
  "bytesize",
