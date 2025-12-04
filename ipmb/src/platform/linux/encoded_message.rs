@@ -42,15 +42,9 @@ impl EncodedMessage {
                 iov_len: 0,
             };
 
-            let mut hdr = libc::msghdr {
-                msg_name: ptr::null_mut(),
-                msg_namelen: 0,
-                msg_iov: &mut iov,
-                msg_iovlen: 1,
-                msg_control: ptr::null_mut(),
-                msg_controllen: 0,
-                msg_flags: 0,
-            };
+            let mut hdr: libc::msghdr = mem::zeroed();
+            hdr.msg_iov = &mut iov;
+            hdr.msg_iovlen = 1;
 
             let mut r = libc::recvmsg(
                 local.0.as_raw(),
@@ -74,7 +68,7 @@ impl EncodedMessage {
 
             let mut control_data: Vec<u8> = super::alloc_buffer::<usize>(meta.control_len as _);
             hdr.msg_control = control_data.as_mut_ptr() as _;
-            hdr.msg_controllen = control_data.len();
+            hdr.msg_controllen = control_data.len() as _;
 
             hdr.msg_flags = 0;
 
@@ -94,7 +88,7 @@ impl EncodedMessage {
                 let control_ptr = control_data.as_ptr() as *const libc::cmsghdr;
                 let mut control_data_ptr = libc::CMSG_DATA(control_ptr) as *const RawFd;
 
-                let control_count = ((*control_ptr).cmsg_len
+                let control_count = ((*control_ptr).cmsg_len as usize
                     - (control_data_ptr as usize - control_ptr as usize))
                     / mem::size_of::<RawFd>();
 
@@ -153,22 +147,16 @@ impl EncodedMessage {
             iov_base: ptr::null_mut(),
             iov_len: 0,
         };
-        let mut hdr = libc::msghdr {
-            msg_name: ptr::null_mut(),
-            msg_namelen: 0,
-            msg_iov: &mut iov,
-            msg_iovlen: 1,
-            msg_control: ptr::null_mut(),
-            msg_controllen: 0,
-            msg_flags: 0,
-        };
+        let mut hdr: libc::msghdr = unsafe { mem::zeroed() };
+        hdr.msg_iov = &mut iov;
+        hdr.msg_iovlen = 1;
 
         // send payload
         iov.iov_base = self.iov_data.as_mut_ptr() as _;
         iov.iov_len = self.iov_data.len();
 
         hdr.msg_control = self.control_data.as_mut_ptr() as _;
-        hdr.msg_controllen = self.control_data.len();
+        hdr.msg_controllen = self.control_data.len() as _;
 
         // Add memory region's ref count
         for r in self.memory_regions.iter() {
