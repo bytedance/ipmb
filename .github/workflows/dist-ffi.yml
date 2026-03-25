@@ -44,8 +44,9 @@ jobs:
         run: |
           sudo snap install zig --classic --beta
           nu -n -c "overlay use action.nu; build ffi aarch64-unknown-linux-gnu"
-        # env:
+        env:
           # RUSTFLAGS: '-C strip=debuginfo'
+          RUSTFLAGS: '-C link-arg=-z -C link-arg=common-page-size=65536 -C link-arg=-z -C link-arg=max-page-size=65536' 
       - uses: softprops/action-gh-release@v1
         with:
           files: |
