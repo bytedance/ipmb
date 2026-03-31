@@ -28,8 +28,8 @@ pub enum Error {
     IoError(#[from] std::io::Error),
     #[error("memory region mapping error")]
     MemoryRegionMapping,
-    #[error("permisson denied")]
-    PermissonDenied,
+    #[error("permission denied")]
+    PermissionDenied,
     #[error("unknown error")]
     Unknown,
 }
@@ -42,8 +42,8 @@ pub enum JoinError {
     TokenMismatch,
     #[error("timeout")]
     Timeout,
-    #[error("permisson denied")]
-    PermissonDenied,
+    #[error("permission denied")]
+    PermissionDenied,
 }
 
 #[derive(Debug, Error)]
@@ -54,8 +54,8 @@ pub enum SendError {
     VersionMismatch(Version),
     #[error("token mismatch")]
     TokenMismatch,
-    #[error("permisson denied")]
-    PermissonDenied,
+    #[error("permission denied")]
+    PermissionDenied,
 }
 
 impl From<JoinError> for SendError {
@@ -64,7 +64,7 @@ impl From<JoinError> for SendError {
             JoinError::VersionMismatch(v) => Self::VersionMismatch(v),
             JoinError::TokenMismatch => Self::TokenMismatch,
             JoinError::Timeout => Self::Timeout,
-            JoinError::PermissonDenied => Self::PermissonDenied,
+            JoinError::PermissionDenied => Self::PermissionDenied,
         }
     }
 }
@@ -79,8 +79,8 @@ pub enum RecvError {
     VersionMismatch(Version),
     #[error("token mismatch")]
     TokenMismatch,
-    #[error("permisson denied")]
-    PermissonDenied,
+    #[error("permission denied")]
+    PermissionDenied,
 }
 
 impl From<JoinError> for RecvError {
@@ -89,7 +89,7 @@ impl From<JoinError> for RecvError {
             JoinError::VersionMismatch(v) => Self::VersionMismatch(v),
             JoinError::TokenMismatch => Self::TokenMismatch,
             JoinError::Timeout => Self::Timeout,
-            JoinError::PermissonDenied => Self::PermissonDenied,
+            JoinError::PermissionDenied => Self::PermissionDenied,
         }
     }
 }

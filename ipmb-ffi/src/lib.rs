@@ -142,7 +142,7 @@ pub unsafe extern "C" fn ipmb_join(
         }
         Err(ipmb::JoinError::VersionMismatch(_)) => ERROR_CODE_VERSION_MISMATCH,
         Err(ipmb::JoinError::TokenMismatch) => ERROR_CODE_TOKEN_MISMATCH,
-        Err(ipmb::JoinError::PermissonDenied) => ERROR_CODE_PERMISSION_DENIED,
+        Err(ipmb::JoinError::PermissionDenied) => ERROR_CODE_PERMISSION_DENIED,
         Err(ipmb::JoinError::Timeout) => ERROR_CODE_TIMEOUT,
     }
 }
@@ -163,7 +163,7 @@ pub unsafe extern "C" fn ipmb_send(sender: &mut Sender, message: Message) -> Err
         Err(ipmb::SendError::Timeout) => ERROR_CODE_TIMEOUT,
         Err(ipmb::SendError::VersionMismatch(_)) => ERROR_CODE_VERSION_MISMATCH,
         Err(ipmb::SendError::TokenMismatch) => ERROR_CODE_TOKEN_MISMATCH,
-        Err(ipmb::SendError::PermissonDenied) => ERROR_CODE_PERMISSION_DENIED,
+        Err(ipmb::SendError::PermissionDenied) => ERROR_CODE_PERMISSION_DENIED,
     }
 }
 
@@ -195,7 +195,7 @@ pub unsafe extern "C" fn ipmb_recv(
         Err(ipmb::RecvError::Decode(_)) => ERROR_CODE_DECODE,
         Err(ipmb::RecvError::VersionMismatch(_)) => ERROR_CODE_VERSION_MISMATCH,
         Err(ipmb::RecvError::TokenMismatch) => ERROR_CODE_TOKEN_MISMATCH,
-        Err(ipmb::RecvError::PermissonDenied) => ERROR_CODE_PERMISSION_DENIED,
+        Err(ipmb::RecvError::PermissionDenied) => ERROR_CODE_PERMISSION_DENIED,
     }
 }
 

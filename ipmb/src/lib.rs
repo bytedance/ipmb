@@ -430,7 +430,7 @@ impl Rule {
         }
 
         let mut timeout_count = 0;
-        // When the service is in the process of registration, other endpoints may return PermissonDenied
+        // When the service is in the process of registration, other endpoints may return PermissionDenied
         let mut permission_denied_count = 0;
 
         let rule = loop {
@@ -487,10 +487,10 @@ impl Rule {
                             break rule;
                         }
                         Err(Error::IdentifierInUse) => {}
-                        Err(Error::PermissonDenied) => {
+                        Err(Error::PermissionDenied) => {
                             permission_denied_count += 1;
                             if permission_denied_count > 5 {
-                                return Err(JoinError::PermissonDenied);
+                                return Err(JoinError::PermissionDenied);
                             }
                             wait!();
                         }
@@ -506,10 +506,10 @@ impl Rule {
                 Err(Error::TokenMismatch) => {
                     return Err(JoinError::TokenMismatch);
                 }
-                Err(Error::PermissonDenied) => {
+                Err(Error::PermissionDenied) => {
                     permission_denied_count += 1;
                     if permission_denied_count > 5 {
-                        return Err(JoinError::PermissonDenied);
+                        return Err(JoinError::PermissionDenied);
                     }
                     wait!();
                 }
