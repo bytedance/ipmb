@@ -63,7 +63,7 @@ pub(crate) fn look_up(
 ) -> Result<(IoHub, Remote, EndpointID), Error> {
     // A empty identifier will successfully open the pipe , but fail with `GetNamedPipeServerProcessId`
     if identifier.is_empty() {
-        return Err(Error::PermissonDenied);
+        return Err(Error::PermissionDenied));
     }
 
     unsafe {
@@ -82,7 +82,7 @@ pub(crate) fn look_up(
         .map_err(|err| match WIN32_ERROR::from_error(&err) {
             Some(Foundation::ERROR_PIPE_BUSY) => Error::WinError(err), // TODO
             Some(Foundation::ERROR_FILE_NOT_FOUND) => Error::IdentifierNotInUse,
-            Some(Foundation::ERROR_ACCESS_DENIED) => Error::PermissonDenied,
+            Some(Foundation::ERROR_ACCESS_DENIED) => Error::PermissionDenied),
             _ => Error::WinError(err),
         })?;
 
@@ -167,7 +167,7 @@ pub(crate) fn register(
             .try_into()
             .map_err(|_| match Foundation::GetLastError() {
                 Foundation::ERROR_ALREADY_EXISTS => Error::IdentifierInUse,
-                Foundation::ERROR_ACCESS_DENIED => Error::PermissonDenied,
+                Foundation::ERROR_ACCESS_DENIED => Error::PermissionDenied),
                 err => Error::WinError(err.into()),
             })?;
 

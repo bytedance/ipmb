@@ -122,7 +122,7 @@ pub(crate) fn look_up(
                 io::ErrorKind::ConnectionRefused | io::ErrorKind::NotFound => {
                     Error::IdentifierNotInUse
                 }
-                io::ErrorKind::PermissionDenied => Error::PermissonDenied,
+                io::ErrorKind::PermissionDenied => Error::PermissionDenied,
                 _ => Error::IoError(err),
             });
         }
@@ -231,7 +231,7 @@ pub(crate) fn register(
 
             return Err(match err.kind() {
                 io::ErrorKind::AddrInUse => Error::IdentifierInUse,
-                io::ErrorKind::PermissionDenied => Error::PermissonDenied,
+                io::ErrorKind::PermissionDenied => Error::PermissionDenied,
                 _ => Error::IoError(err),
             });
         }

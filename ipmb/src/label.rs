@@ -114,7 +114,6 @@ impl<T: Into<SmolStr>> From<T> for LabelOp {
 #[cfg(test)]
 mod test {
     use super::LabelOp;
-    use crate::label;
 
     #[test]
     fn empty_label() {

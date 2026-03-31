@@ -298,7 +298,7 @@ pub fn join(options: Options, timeout: Option<u32>, mut env: Env) -> Result<napi
             Err(
                 ipmb::RecvError::VersionMismatch(_)
                 | ipmb::RecvError::TokenMismatch
-                | ipmb::RecvError::PermissonDenied,
+                | ipmb::RecvError::PermissionDenied,
             ) => {
                 tsfn.call(DelegateAction::Recv(r));
                 tsfn.destroy();

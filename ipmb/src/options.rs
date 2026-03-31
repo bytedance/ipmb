@@ -7,7 +7,7 @@ pub struct Options {
     pub identifier: String,
     /// The label of the endpoint through which messages can be routed to the endpoint..
     pub label: Label,
-    /// Secturity token.
+    /// Security token.
     pub token: String,
     /// Whether the endpoint can become a bus controller.
     pub controller_affinity: bool,

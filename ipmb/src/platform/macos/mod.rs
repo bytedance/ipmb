@@ -103,7 +103,7 @@ pub(crate) fn look_up(
                 }
             }
             mach_sys::BOOTSTRAP_UNKNOWN_SERVICE => Err(Error::IdentifierNotInUse),
-            mach_sys::BOOTSTRAP_NOT_PRIVILEGED => Err(Error::PermissonDenied),
+            mach_sys::BOOTSTRAP_NOT_PRIVILEGED => Err(Error::PermissionDenied),
             _ => Err(Error::Unknown), // TODO
         }
     }
@@ -132,7 +132,7 @@ pub(crate) fn register(
                 ))
             }
             mach_sys::BOOTSTRAP_NAME_IN_USE => Err(Error::IdentifierInUse),
-            mach_sys::BOOTSTRAP_NOT_PRIVILEGED => Err(Error::PermissonDenied),
+            mach_sys::BOOTSTRAP_NOT_PRIVILEGED => Err(Error::PermissionDenied),
             _ => Err(Error::Unknown), // TODO
         }
     }
