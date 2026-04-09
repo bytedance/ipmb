@@ -8,8 +8,8 @@ use windows::{
 
 pub(crate) const DEFAULT_BUFFER_SIZE: u32 = 4 << 20;
 
-pub unsafe fn anon_pipe(sa: &SecurityAttr) -> Result<(Handle, Handle), Error> {
-    let name: HSTRING = format!("\\\\.\\pipe\\{}", util::rand_string(8)).into();
+pub unsafe fn anon_pipe(identifier: &str, sa: &SecurityAttr) -> Result<(Handle, Handle), Error> {
+    let name: HSTRING = format!("\\\\.\\pipe\\{}.{}", identifier, util::rand_string(8)).into();
 
     // Create read pipe
     let pipe_handle = Pipes::CreateNamedPipeW(

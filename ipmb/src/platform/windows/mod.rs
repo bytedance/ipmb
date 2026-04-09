@@ -67,10 +67,10 @@ pub(crate) fn look_up(
     }
 
     unsafe {
-        let identifier: HSTRING = format!("\\\\.\\pipe\\{}", identifier).into();
+        let identifier_h: HSTRING = format!("\\\\.\\pipe\\{}", identifier).into();
 
         let pipe_handle: Foundation::HANDLE = FileSystem::CreateFileW(
-            &identifier,
+            &identifier_h,
             FileSystem::FILE_GENERIC_WRITE.0,
             FileSystem::FILE_SHARE_NONE,
             None,
@@ -112,7 +112,7 @@ pub(crate) fn look_up(
             };
         remote.process = Some(Handle(server_process));
 
-        let (read_pipe, write_pipe) = pipe::anon_pipe(&im.sa)?;
+        let (read_pipe, write_pipe) = pipe::anon_pipe(identifier, &im.sa)?;
         let read_pipe = NamedPipe::new(read_pipe, NamedPipeStatus::Readable);
 
         let mut msg = Message::new(
@@ -131,7 +131,7 @@ pub(crate) fn look_up(
         let mut encoded_msg = msg.into_encoded();
         encoded_msg.send(&remote)?;
 
-        let mut io_hub: IoHub = IoHub::for_endpoint(im, identifier, read_pipe);
+        let mut io_hub: IoHub = IoHub::for_endpoint(im, identifier_h, read_pipe);
         // Wait ack
         let encoded_msg = io_hub.recv(Some(Duration::from_secs(2)), None)?;
         let ack = ConnectMessageAck::decode(encoded_msg.selector.uuid, encoded_msg.payload_data)?;
