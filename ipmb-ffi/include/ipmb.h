@@ -42,6 +42,8 @@ namespace ipmb {
 
         ~Label();
 
+        void append(const std::string& s);
+
     private:
         ipmb_ffi::Label raw_ = nullptr;
 

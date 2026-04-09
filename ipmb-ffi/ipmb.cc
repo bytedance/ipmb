@@ -53,6 +53,10 @@ namespace ipmb {
         }
     }
 
+    void Label::append(const std::string& s) {
+      ipmb_ffi::ipmb_label_insert(&raw_, s.c_str());
+    }
+
     /// LabelOp
     LabelOp::LabelOp(bool v) {
         raw_ = ipmb_ffi::ipmb_label_op_bool(v);
