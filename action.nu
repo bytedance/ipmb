@@ -83,7 +83,6 @@ export def "build js" [...targets: string] {
 export def "dist js" [] {
     cd ipmb-js
 
-    $"//registry.npmjs.org/:_authToken=($env.NPM_TOKEN)" | save .npmrc -f
     npm publish 
 
     cd ..
