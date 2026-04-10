@@ -17,107 +17,50 @@ namespace ipmb {
     }
 
     /// Label
-    Label::Label() {
-        raw_ = ipmb_ffi::ipmb_label();
-    }
+    Label::Label()
+        : ptr_(ipmb_ffi::ipmb_label(),
+               [](ipmb_ffi::Label raw) { ipmb_ffi::ipmb_label_drop(raw); }) {}
 
-    Label::Label(std::initializer_list<std::string> list) {
-        raw_ = ipmb_ffi::ipmb_label();
-
-        for (auto& i: list) {
-            ipmb_ffi::ipmb_label_insert(&raw_, i.c_str());
-        }
-    }
-
-    Label::Label(Label&& other) noexcept {
-        raw_ = other.raw_;
-        other.raw_ = nullptr;
-    }
-
-    Label& Label::operator=(Label&& other) noexcept {
-        if (this != &other) {
-            if (raw_) {
-                ipmb_ffi::ipmb_label_drop(raw_);
-            }
-
-            raw_ = other.raw_;
-            other.raw_ = nullptr;
-        }
-
-        return *this;
-    }
-
-    Label::~Label() {
-        if (raw_) {
-            ipmb_ffi::ipmb_label_drop(raw_);
-        }
+    Label::Label(std::initializer_list<std::string> list) : Label() {
+      auto* raw = ptr_.get();
+      for (auto& i : list) {
+        ipmb_ffi::ipmb_label_insert(&raw, i.c_str());
+      }
     }
 
     void Label::append(const std::string& s) {
-      ipmb_ffi::ipmb_label_insert(&raw_, s.c_str());
+      auto* raw = ptr_.get();
+      ipmb_ffi::ipmb_label_insert(&raw, s.c_str());
     }
 
     /// LabelOp
-    LabelOp::LabelOp(bool v) {
-        raw_ = ipmb_ffi::ipmb_label_op_bool(v);
-    }
+    LabelOp::LabelOp(bool v)
+        : ptr_(ipmb_ffi::ipmb_label_op_bool(v), [](ipmb_ffi::LabelOp raw) {
+            ipmb_ffi::ipmb_label_op_drop(raw);
+          }) {}
 
-    LabelOp::LabelOp(const std::string& s) {
-        raw_ = ipmb_ffi::ipmb_label_op_leaf(s.c_str());
-    }
+    LabelOp::LabelOp(const std::string& s) : LabelOp(s.c_str()) {}
 
-    LabelOp::LabelOp(const char* s) {
-        raw_ = ipmb_ffi::ipmb_label_op_leaf(s);
-    }
-
-    LabelOp::LabelOp(ipmb::LabelOp&& other) noexcept {
-        raw_ = other.raw_;
-        other.raw_ = nullptr;
-    }
-
-    LabelOp& LabelOp::operator=(LabelOp&& other) noexcept {
-        if (this != &other) {
-            if (raw_) {
-                ipmb_ffi::ipmb_label_op_drop(raw_);
-            }
-
-            raw_ = other.raw_;
-            other.raw_ = nullptr;
-        }
-
-        return *this;
-    }
-
-    LabelOp::~LabelOp() {
-        if (raw_) {
-            ipmb_ffi::ipmb_label_op_drop(raw_);
-        }
-    }
+    LabelOp::LabelOp(const char* s)
+        : ptr_(ipmb_ffi::ipmb_label_op_leaf(s), [](ipmb_ffi::LabelOp raw) {
+            ipmb_ffi::ipmb_label_op_drop(raw);
+          }) {}
 
     void LabelOp::op_not() {
-        if (raw_) {
-            raw_ = ipmb_ffi::ipmb_label_op_not(raw_);
-        }
+      auto* raw = ipmb_ffi::ipmb_label_op_not(ptr_.release());
+      ptr_.reset(raw);
     }
 
-    void LabelOp::op_and(LabelOp&& right) {
-        if (!raw_ || !right.raw_) {
-            return;
-        }
-
-        raw_ = ipmb_ffi::ipmb_label_op_and(raw_, right.raw_);
-
-        right.raw_ = nullptr;
+    void LabelOp::op_and(LabelOp right) {
+      auto* raw =
+          ipmb_ffi::ipmb_label_op_and(ptr_.release(), right.ptr_.release());
+      ptr_.reset(raw);
     }
 
-    void LabelOp::op_or(LabelOp&& right) {
-        if (!raw_ || !right.raw_) {
-            return;
-        }
-
-        raw_ = ipmb_ffi::ipmb_label_op_or(raw_, right.raw_);
-
-        right.raw_ = nullptr;
+    void LabelOp::op_or(LabelOp right) {
+      auto* raw =
+          ipmb_ffi::ipmb_label_op_or(ptr_.release(), right.ptr_.release());
+      ptr_.reset(raw);
     }
 
     /// Options
@@ -128,14 +71,11 @@ namespace ipmb {
               controller_affinity(controller_affinity) {}
 
     ipmb_ffi::Options Options::as_ffi() {
-        ipmb_ffi::Options options {
-                identifier.c_str(),
-                &label.raw_,
-                token.c_str(),
-                controller_affinity
-        };
+      label_raw_ = label.ptr_.get();
+      ipmb_ffi::Options options{identifier.c_str(), &label_raw_, token.c_str(),
+                                controller_affinity};
 
-        return options;
+      return options;
     }
 
     /// Selector
@@ -145,135 +85,85 @@ namespace ipmb {
               ttl(ttl) {}
 
     ipmb_ffi::Selector Selector::as_ffi() {
-        ipmb_ffi::Selector selector {
-                &label_op.raw_,
-                mode,
-                ttl
-        };
+      label_op_raw_ = label_op.ptr_.get();
+      ipmb_ffi::Selector selector{&label_op_raw_, mode, ttl};
 
-        return selector;
+      return selector;
     }
 
     /// MemoryRegion
-    MemoryRegion::MemoryRegion(uintptr_t size) {
-        ipmb_ffi::ipmb_memory_region(size, &raw_);
+    std::tuple<MemoryRegion, Error> MemoryRegion::create(uintptr_t size) {
+      ipmb_ffi::MemoryRegion raw;
+      switch (ipmb_ffi::ipmb_memory_region(size, &raw)) {
+        case ipmb_ffi::ERROR_CODE_SUCCESS:
+          return std::make_tuple(MemoryRegion(raw), Error::kSuccess);
+        default:
+          return std::make_tuple(MemoryRegion(nullptr), Error::kUnknown);
+      }
     }
 
     std::tuple<MemoryRegion, Error> MemoryRegion::clone() {
-        if (!raw_) {
-            return std::make_tuple(MemoryRegion(), Error::kUnknown);
-        }
-        ipmb_ffi::MemoryRegion region_raw = nullptr;
-        auto r = ipmb_ffi::ipmb_memory_region_clone(&raw_, &region_raw);
-        switch (r) {
+      ipmb_ffi::MemoryRegion cloned_raw = nullptr;
+      auto* raw = ptr_.get();
+      auto r = ipmb_ffi::ipmb_memory_region_clone(&raw, &cloned_raw);
+      switch (r) {
         case ipmb_ffi::ERROR_CODE_SUCCESS:
-            return std::make_tuple(MemoryRegion(region_raw),
-                               Error::kSuccess);
+          return std::make_tuple(MemoryRegion(cloned_raw), Error::kSuccess);
         default:
-            return std::make_tuple(MemoryRegion(), Error::kUnknown);
-        }
+          return std::make_tuple(MemoryRegion(nullptr), Error::kUnknown);
+      }
     }
 
-    MemoryRegion::MemoryRegion(MemoryRegion&& other) noexcept {
-        raw_ = other.raw_;
-        other.raw_ = nullptr;
-    }
-
-    MemoryRegion& MemoryRegion::operator=(MemoryRegion&& other) noexcept {
-        if (this != &other) {
-            if (raw_) {
-                ipmb_ffi::ipmb_memory_region_drop(raw_);
-            }
-
-            raw_ = other.raw_;
-            other.raw_ = nullptr;
-        }
-
-        return *this;
-    }
-
-    MemoryRegion::~MemoryRegion() {
-        if (raw_) {
-            ipmb_ffi::ipmb_memory_region_drop(raw_);
-        }
-    }
-
-    bool MemoryRegion::valid() {
-        return raw_;
-    }
-
-    std::tuple<uint8_t*, intptr_t, Error> MemoryRegion::map(uintptr_t offset, intptr_t size) {
-        if (!raw_) {
-            return std::make_tuple(nullptr, 0, Error::kUnknown);
-        }
-
-        intptr_t real_size = 0;
-        auto ptr = ipmb_ffi::ipmb_memory_region_map(&raw_, offset, size, &real_size);
-        if (ptr) {
-            return std::make_tuple(ptr, real_size, Error::kSuccess);
-        } else {
-            return std::make_tuple(nullptr, 0, Error::kUnknown);
-        }
+    std::tuple<uint8_t*, intptr_t, Error> MemoryRegion::map(uintptr_t offset,
+                                                            intptr_t size) {
+      intptr_t real_size = 0;
+      auto* raw = ptr_.get();
+      auto ptr =
+          ipmb_ffi::ipmb_memory_region_map(&raw, offset, size, &real_size);
+      if (ptr) {
+        return std::make_tuple(ptr, real_size, Error::kSuccess);
+      } else {
+        return std::make_tuple(nullptr, 0, Error::kUnknown);
+      }
     }
 
     std::tuple<uint32_t, Error> MemoryRegion::ref_count() {
-        if (!raw_) {
-            return std::make_tuple(0, Error::kUnknown);
-        }
-
-        return std::make_tuple(ipmb_ffi::ipmb_memory_region_ref_count(&raw_), Error::kSuccess);
+      auto* raw = ptr_.get();
+      return std::make_tuple(ipmb_ffi::ipmb_memory_region_ref_count(&raw),
+                             Error::kSuccess);
     }
 
-    MemoryRegion::MemoryRegion(ipmb_ffi::MemoryRegion raw) : raw_(raw) {}
+    MemoryRegion::MemoryRegion(ipmb_ffi::MemoryRegion raw)
+        : ptr_(raw, [](ipmb_ffi::MemoryRegion raw) {
+            ipmb_ffi::ipmb_memory_region_drop(raw);
+          }) {}
 
     /// MemoryRegistry
-    MemoryRegistry::MemoryRegistry() {
-        raw_ = ipmb_ffi::ipmb_memory_registry();
-    }
+    MemoryRegistry::MemoryRegistry()
+        : ptr_(ipmb_ffi::ipmb_memory_registry(),
+               [](ipmb_ffi::MemoryRegistry raw) {
+                 ipmb_ffi::ipmb_memory_registry_drop(raw);
+               }) {}
 
-    MemoryRegistry::MemoryRegistry(MemoryRegistry&& other) noexcept {
-        raw_ = other.raw_;
-        other.raw_ = nullptr;
-    }
+    std::tuple<MemoryRegion, Error> MemoryRegistry::alloc(
+        uintptr_t min_size,
+        const std::string* tag) {
+      const char* tag_raw = nullptr;
+      if (tag) {
+        tag_raw = tag->c_str();
+      }
 
-    MemoryRegistry& MemoryRegistry::operator=(MemoryRegistry&& other) noexcept {
-        if (this != &other) {
-            if (raw_) {
-                ipmb_ffi::ipmb_memory_registry_drop(raw_);
-            }
-
-            raw_ = other.raw_;
-            other.raw_ = nullptr;
-        }
-
-        return *this;
-    }
-
-    MemoryRegistry::~MemoryRegistry() {
-        if (raw_) {
-            ipmb_ffi::ipmb_memory_registry_drop(raw_);
-        }
-    }
-
-    std::tuple<MemoryRegion, Error> MemoryRegistry::alloc(uintptr_t min_size, const std::string* tag) {
-        if (!raw_) {
-            return std::make_tuple(MemoryRegion(), Error::kUnknown);
-        }
-
-        const char* tag_raw = nullptr;
-        if (tag) {
-            tag_raw = tag->c_str();
-        }
-
-        ipmb_ffi::MemoryRegion region_raw = nullptr;
-        auto r = ipmb_ffi::ipmb_memory_registry_alloc(&raw_, min_size, tag_raw, &region_raw);
-        switch (r) {
+      ipmb_ffi::MemoryRegion region_raw = nullptr;
+      auto* raw = ptr_.get();
+      auto r = ipmb_ffi::ipmb_memory_registry_alloc(&raw, min_size, tag_raw,
+                                                    &region_raw);
+      switch (r) {
         case ipmb_ffi::ERROR_CODE_SUCCESS:
             return std::make_tuple(MemoryRegion(region_raw),
                                Error::kSuccess);
         default:
-            return std::make_tuple(MemoryRegion(), Error::kUnknown);
-        }
+          return std::make_tuple(MemoryRegion(nullptr), Error::kUnknown);
+      }
     }
 
     extern "C" void free_function(void* free_context) {
@@ -282,246 +172,156 @@ namespace ipmb {
         delete fp;
     }
 
-    std::tuple<MemoryRegion, Error>
-    MemoryRegistry::alloc_with_free(uintptr_t min_size, const std::string* tag, std::function<void()> free) {
-        if (!raw_) {
-            return std::make_tuple(MemoryRegion(), Error::kUnknown);
-        }
+    std::tuple<MemoryRegion, Error> MemoryRegistry::alloc_with_free(
+        uintptr_t min_size,
+        const std::string* tag,
+        std::function<void()> free) {
+      const char* tag_raw = nullptr;
+      if (tag) {
+        tag_raw = tag->c_str();
+      }
 
-        const char* tag_raw = nullptr;
-        if (tag) {
-            tag_raw = tag->c_str();
-        }
+      auto f = new std::function<void()>(std::move(free));
 
-        auto f = new std::function<void()>(std::move(free));
-
-        ipmb_ffi::MemoryRegion region_raw = nullptr;
-        auto r = ipmb_ffi::ipmb_memory_registry_alloc_with_free(
-                &raw_, min_size, tag_raw,
-                f,
-                free_function,
-                &region_raw
-        );
-        switch (r) {
+      ipmb_ffi::MemoryRegion region_raw = nullptr;
+      auto* raw = ptr_.get();
+      auto r = ipmb_ffi::ipmb_memory_registry_alloc_with_free(
+          &raw, min_size, tag_raw, f, free_function, &region_raw);
+      switch (r) {
         case ipmb_ffi::ERROR_CODE_SUCCESS:
             return std::make_tuple(MemoryRegion(region_raw),
                                Error::kSuccess);
         default:
-            return std::make_tuple(MemoryRegion(), Error::kUnknown);
-        }
+          return std::make_tuple(MemoryRegion(nullptr), Error::kUnknown);
+      }
     }
 
     Error MemoryRegistry::maintain() {
-        if (!raw_) {
-            return Error::kUnknown;
-        }
-
-        ipmb_ffi::ipmb_memory_registry_maintain(&raw_);
-        return Error::kSuccess;
+      auto* raw = ptr_.get();
+      ipmb_ffi::ipmb_memory_registry_maintain(&raw);
+      return Error::kSuccess;
     }
 
     /// Message
-    Message::Message(Selector& selector, uint16_t format, const uint8_t* ptr, uint32_t size) {
-        raw_ = ipmb_ffi::ipmb_message(selector.as_ffi(), format, ptr, size);
-    }
+    Message::Message(Selector& selector,
+                     uint16_t format,
+                     const uint8_t* ptr,
+                     uint32_t size)
+        : Message(
+              ipmb_ffi::ipmb_message(selector.as_ffi(), format, ptr, size)) {}
 
-    Message::Message(Message&& other) noexcept {
-        raw_ = other.raw_;
-        other.raw_ = nullptr;
-    }
+    std::tuple<uint16_t, const uint8_t*, uint32_t, Error>
+    Message::bytes_data() {
+      uint16_t format = 0;
+      const uint8_t* ptr = nullptr;
+      uint32_t size = 0;
 
-    Message& Message::operator=(Message&& other) noexcept {
-        if (this != &other) {
-            if (raw_) {
-                ipmb_ffi::ipmb_message_drop(raw_);
-            }
+      auto* raw = ptr_.get();
+      ipmb_ffi::ipmb_message_bytes_data(&raw, &format, &ptr, &size);
 
-            raw_ = other.raw_;
-            other.raw_ = nullptr;
-        }
-
-        return *this;
-    }
-
-    Message::~Message() {
-        if (raw_) {
-            ipmb_ffi::ipmb_message_drop(raw_);
-        }
-    }
-
-    std::tuple<uint16_t, const uint8_t*, uint32_t, Error> Message::bytes_data() {
-        if (!raw_) {
-            return std::make_tuple(0, nullptr, 0, Error::kUnknown);
-        }
-
-        uint16_t format = 0;
-        const uint8_t* ptr = nullptr;
-        uint32_t size = 0;
-        ipmb_ffi::ipmb_message_bytes_data(&raw_, &format, &ptr, &size);
-
-        return std::make_tuple(format, ptr, size, Error::kSuccess);
+      return std::make_tuple(format, ptr, size, Error::kSuccess);
     }
 
     void Message::object_append(ipmb_ffi::Object obj) {
-        if (raw_) {
-            ipmb_ffi::ipmb_message_object_append(&raw_, obj);
-        }
+      auto* raw = ptr_.get();
+      ipmb_ffi::ipmb_message_object_append(&raw, obj);
     }
 
     std::tuple<ipmb_ffi::Object, Error> Message::object_retrieve(uintptr_t index) {
-        if (!raw_) {
-            return std::make_tuple(0, Error::kUnknown);
-        }
-
-        auto obj = ipmb_ffi::ipmb_message_object_retrieve(&raw_, index);
-        if (obj) {
-            return std::make_tuple(obj, Error::kSuccess);
-        } else {
-            return std::make_tuple(0, Error::kUnknown);
-        }
+      auto* raw = ptr_.get();
+      auto obj = ipmb_ffi::ipmb_message_object_retrieve(&raw, index);
+      if (obj) {
+        return std::make_tuple(obj, Error::kSuccess);
+      } else {
+        return std::make_tuple(0, Error::kUnknown);
+      }
     }
 
     std::tuple<ipmb_ffi::Object, Error> Message::object_get(uintptr_t index) {
-        if (!raw_) {
-            return std::make_tuple(0, Error::kUnknown);
-        }
-
-        auto obj = ipmb_ffi::ipmb_message_object_get(&raw_, index);
-        if (obj) {
-            return std::make_tuple(obj, Error::kSuccess);
-        } else {
-            return std::make_tuple(0, Error::kUnknown);
-        }
+      auto* raw = ptr_.get();
+      auto obj = ipmb_ffi::ipmb_message_object_get(&raw, index);
+      if (obj) {
+        return std::make_tuple(obj, Error::kSuccess);
+      } else {
+        return std::make_tuple(0, Error::kUnknown);
+      }
     }
 
-    void Message::memory_region_append(MemoryRegion&& region) {
-        if (!raw_ || !region.raw_) {
-            return;
-        }
-
-        ipmb_ffi::ipmb_message_memory_region_append(&raw_, region.raw_);
-        region.raw_ = nullptr;
+    void Message::memory_region_append(MemoryRegion region) {
+      auto* raw = ptr_.get();
+      ipmb_ffi::ipmb_message_memory_region_append(&raw, region.ptr_.release());
     }
 
     std::tuple<MemoryRegion, Error> Message::memory_region_retrieve(uintptr_t index) {
-        if (!raw_) {
-            return std::make_tuple(MemoryRegion(), Error::kUnknown);
-        }
-
-        auto region_raw = ipmb_ffi::ipmb_message_memory_region_retrieve(&raw_, index);
-        if (region_raw) {
-            return std::make_tuple(MemoryRegion(region_raw), Error::kSuccess);
-        } else {
-            return std::make_tuple(MemoryRegion(), Error::kUnknown);
-        }
+      auto* raw = ptr_.get();
+      auto region_raw =
+          ipmb_ffi::ipmb_message_memory_region_retrieve(&raw, index);
+      if (region_raw) {
+        return std::make_tuple(MemoryRegion(region_raw), Error::kSuccess);
+      } else {
+        return std::make_tuple(MemoryRegion(nullptr), Error::kUnknown);
+      }
     }
 
-    Message::Message(ipmb_ffi::Message raw) : raw_(raw) {}
+    Message::Message(ipmb_ffi::Message raw)
+        : ptr_(raw, [](ipmb_ffi::Message raw) {
+            ipmb_ffi::ipmb_message_drop(raw);
+          }) {}
 
     /// Sender
-    Sender::Sender(ipmb_ffi::Sender raw) : raw_(raw) {}
+    Sender::Sender(ipmb_ffi::Sender raw)
+        : ptr_(raw,
+               [](ipmb_ffi::Sender raw) { ipmb_ffi::ipmb_sender_drop(raw); }) {}
 
-    Sender::Sender(Sender&& other) noexcept {
-        raw_ = other.raw_;
-        other.raw_ = nullptr;
-    }
+    Error Sender::send(Message message) {
+      auto* raw = ptr_.get();
+      auto r = ipmb_ffi::ipmb_send(&raw, message.ptr_.release());
 
-    Sender& Sender::operator=(Sender&& other) noexcept {
-        if (this != &other) {
-            if (raw_) {
-                ipmb_ffi::ipmb_sender_drop(raw_);
-            }
-
-            raw_ = other.raw_;
-            other.raw_ = nullptr;
-        }
-
-        return *this;
-    }
-
-    Sender::~Sender() {
-        if (raw_) {
-            ipmb_ffi::ipmb_sender_drop(raw_);
-        }
-    }
-
-    Error Sender::send(Message&& message) {
-        if (!raw_ || !message.raw_) {
-            return Error::kUnknown;
-        }
-
-        auto r = ipmb_ffi::ipmb_send(&raw_, message.raw_);
-        message.raw_ = nullptr;
-
-        switch (r) {
-            case ipmb_ffi::ERROR_CODE_SUCCESS:
-                return Error::kSuccess;
-            case ipmb_ffi::ERROR_CODE_TIMEOUT:
-                return Error::kTimeout;
-            case ipmb_ffi::ERROR_CODE_DECODE:
-                return Error::kDecode;
-            case ipmb_ffi::ERROR_CODE_TOKEN_MISMATCH:
-                return Error::kTokenMismatch;
-            case ipmb_ffi::ERROR_CODE_VERSION_MISMATCH:
-                return Error::kVersionMismatch;
-            case ipmb_ffi::ERROR_CODE_PERMISSION_DENIED:
-                return Error::kPermissionDenied;
-            default:
-                return Error::kUnknown;
-        }
+      switch (r) {
+        case ipmb_ffi::ERROR_CODE_SUCCESS:
+          return Error::kSuccess;
+        case ipmb_ffi::ERROR_CODE_TIMEOUT:
+          return Error::kTimeout;
+        case ipmb_ffi::ERROR_CODE_DECODE:
+          return Error::kDecode;
+        case ipmb_ffi::ERROR_CODE_TOKEN_MISMATCH:
+          return Error::kTokenMismatch;
+        case ipmb_ffi::ERROR_CODE_VERSION_MISMATCH:
+          return Error::kVersionMismatch;
+        case ipmb_ffi::ERROR_CODE_PERMISSION_DENIED:
+          return Error::kPermissionDenied;
+        default:
+          return Error::kUnknown;
+      }
     }
 
     /// Receiver
-    Receiver::Receiver(ipmb_ffi::Receiver raw) : raw_(raw) {}
-
-    Receiver::Receiver(Receiver&& other) noexcept {
-        raw_ = other.raw_;
-        other.raw_ = nullptr;
-    }
-
-    Receiver& Receiver::operator=(Receiver&& other) noexcept {
-        if (this != &other) {
-            if (raw_) {
-                ipmb_ffi::ipmb_receiver_drop(raw_);
-            }
-
-            raw_ = other.raw_;
-            other.raw_ = nullptr;
-        }
-
-        return *this;
-    }
-
-    Receiver::~Receiver() {
-        if (raw_) {
-            ipmb_ffi::ipmb_receiver_drop(raw_);
-        }
-    }
+    Receiver::Receiver(ipmb_ffi::Receiver raw)
+        : ptr_(raw, [](ipmb_ffi::Receiver raw) {
+            ipmb_ffi::ipmb_receiver_drop(raw);
+          }) {}
 
     std::tuple<Message, Error> Receiver::recv(uint32_t timeout) {
-        if (!raw_) {
-            return std::make_tuple(Message(), Error::kUnknown);
-        }
+      ipmb_ffi::Message m_raw = nullptr;
+      auto* raw = ptr_.get();
+      auto r = ipmb_ffi::ipmb_recv(&raw, &m_raw, timeout);
 
-        ipmb_ffi::Message m_raw = nullptr;
-        auto r = ipmb_ffi::ipmb_recv(&raw_, &m_raw, timeout);
-
-        switch (r) {
-            case ipmb_ffi::ERROR_CODE_SUCCESS:
-                return std::make_tuple(Message {m_raw}, Error::kSuccess);
-            case ipmb_ffi::ERROR_CODE_TIMEOUT:
-                return std::make_tuple(Message(), Error::kTimeout);
-            case ipmb_ffi::ERROR_CODE_DECODE:
-                return std::make_tuple(Message(), Error::kDecode);
-            case ipmb_ffi::ERROR_CODE_TOKEN_MISMATCH:
-                return std::make_tuple(Message(), Error::kTokenMismatch);
-            case ipmb_ffi::ERROR_CODE_VERSION_MISMATCH:
-                return std::make_tuple(Message(), Error::kVersionMismatch);
-            case ipmb_ffi::ERROR_CODE_PERMISSION_DENIED:
-                return std::make_tuple(Message(), Error::kPermissionDenied);
-            default:
-                return std::make_tuple(Message(), Error::kUnknown);
-        }
+      switch (r) {
+        case ipmb_ffi::ERROR_CODE_SUCCESS:
+          return std::make_tuple(Message(m_raw), Error::kSuccess);
+        case ipmb_ffi::ERROR_CODE_TIMEOUT:
+          return std::make_tuple(Message(nullptr), Error::kTimeout);
+        case ipmb_ffi::ERROR_CODE_DECODE:
+          return std::make_tuple(Message(nullptr), Error::kDecode);
+        case ipmb_ffi::ERROR_CODE_TOKEN_MISMATCH:
+          return std::make_tuple(Message(nullptr), Error::kTokenMismatch);
+        case ipmb_ffi::ERROR_CODE_VERSION_MISMATCH:
+          return std::make_tuple(Message(nullptr), Error::kVersionMismatch);
+        case ipmb_ffi::ERROR_CODE_PERMISSION_DENIED:
+          return std::make_tuple(Message(nullptr), Error::kPermissionDenied);
+        default:
+          return std::make_tuple(Message(nullptr), Error::kUnknown);
+      }
     }
 
     /// join
@@ -534,17 +334,23 @@ namespace ipmb {
             case ipmb_ffi::ERROR_CODE_SUCCESS:
                 return std::make_tuple(Sender(s_raw), Receiver(r_raw), Error::kSuccess);
             case ipmb_ffi::ERROR_CODE_TIMEOUT:
-                return std::make_tuple(Sender(), Receiver(), Error::kTimeout);
+              return std::make_tuple(Sender(nullptr), Receiver(nullptr),
+                                     Error::kTimeout);
             case ipmb_ffi::ERROR_CODE_DECODE:
-                return std::make_tuple(Sender(), Receiver(), Error::kDecode);
+              return std::make_tuple(Sender(nullptr), Receiver(nullptr),
+                                     Error::kDecode);
             case ipmb_ffi::ERROR_CODE_TOKEN_MISMATCH:
-                return std::make_tuple(Sender(), Receiver(), Error::kTokenMismatch);
+              return std::make_tuple(Sender(nullptr), Receiver(nullptr),
+                                     Error::kTokenMismatch);
             case ipmb_ffi::ERROR_CODE_VERSION_MISMATCH:
-                return std::make_tuple(Sender(), Receiver(), Error::kVersionMismatch);
+              return std::make_tuple(Sender(nullptr), Receiver(nullptr),
+                                     Error::kVersionMismatch);
             case ipmb_ffi::ERROR_CODE_PERMISSION_DENIED:
-                return std::make_tuple(Sender(), Receiver(), Error::kPermissionDenied);
+              return std::make_tuple(Sender(nullptr), Receiver(nullptr),
+                                     Error::kPermissionDenied);
             default:
-                return std::make_tuple(Sender(), Receiver(), Error::kUnknown);
+              return std::make_tuple(Sender(nullptr), Receiver(nullptr),
+                                     Error::kUnknown);
         }
     }
 }

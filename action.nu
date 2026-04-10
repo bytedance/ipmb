@@ -178,7 +178,7 @@ export def "demo cc plus" [] {
     cargo build -p ipmb-ffi
     cmake -B build -S .
     cmake --build build --target cc_client_plus
-	./build/cc_client
+	./build/cc_client_plus
 }
 
 export def "demo js" [] {

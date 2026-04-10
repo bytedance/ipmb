@@ -18,10 +18,8 @@ int main() {
             true
     );
 
-    ipmb::Sender sender;
-    ipmb::Receiver receiver;
-    ipmb::Error err;
-    std::tie(sender, receiver, err) = ipmb::join(options, ipmb_ffi::TIMEOUT_INFINITE);
+    auto [sender, receiver, err] =
+        ipmb::join(options, ipmb_ffi::TIMEOUT_INFINITE);
     if (err != ipmb::Error::kSuccess) {
         return -1;
     }
@@ -39,15 +37,12 @@ int main() {
 
         const uint8_t buffer[5] {0, 1, 2, 3, 4};
 
-        ipmb::Error err;
-
         while (true) {
             std::this_thread::sleep_for(std::chrono::seconds(2));
 
             ipmb::Message message(selector, 2, buffer, sizeof(buffer));
 
-            ipmb::MemoryRegion region;
-            std::tie(region, err) = registry.alloc(64, nullptr);
+            auto [region, err] = registry.alloc(64, nullptr);
             if (err != ipmb::Error::kSuccess) {
                 break;
             }
@@ -62,11 +57,10 @@ int main() {
     });
 
     for (;;) {
-        ipmb::Message message;
-        std::tie(message, err) = receiver.recv(ipmb_ffi::TIMEOUT_INFINITE);
-        if (err != ipmb::Error::kSuccess) {
-            break;
-        }
+      auto [message, err] = receiver.recv(ipmb_ffi::TIMEOUT_INFINITE);
+      if (err != ipmb::Error::kSuccess) {
+        break;
+      }
 
         uint16_t format;
         const uint8_t* ptr;
@@ -76,10 +70,9 @@ int main() {
             break;
         }
 
-        ipmb::MemoryRegion region;
-        std::tie(region, err) = message.memory_region_retrieve(0);
-        if (err != ipmb::Error::kSuccess) {
-            break;
+        auto [region, retrieve_err] = message.memory_region_retrieve(0);
+        if (retrieve_err != ipmb::Error::kSuccess) {
+          break;
         }
 
         uint8_t* region_ptr;
