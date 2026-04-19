@@ -21,7 +21,6 @@ pub struct BusController {
     sender: Sender<EncodedMessage>,
     endpoints: Vec<Endpoint>,
     message_buffer: Vec<(Instant, EncodedMessage)>,
-    message_buffer_swap: Vec<(Instant, EncodedMessage)>,
     io_hub: IoHub,
     last_detect_reachable: Instant,
 }
@@ -41,7 +40,6 @@ impl BusController {
             sender,
             endpoints: Default::default(),
             message_buffer: Default::default(),
-            message_buffer_swap: Default::default(),
             io_hub,
             last_detect_reachable: Instant::now(),
         }
@@ -81,13 +79,10 @@ impl BusController {
                         let (remain, _) = self.handle_message(msg);
                         if let Some(remain) = remain {
                             if expire > now {
-                                self.message_buffer_swap.push((expire, remain));
+                                self.message_buffer.push((expire, remain));
                             }
                         }
                     }
-
-                    self.message_buffer = message_buffer;
-                    mem::swap(&mut self.message_buffer, &mut self.message_buffer_swap);
                 }
 
                 self.detect_reachable(now);
