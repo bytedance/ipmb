@@ -517,7 +517,7 @@ impl Rule {
                     timeout_count += 1;
 
                     if timeout_count > 5 {
-                        return Err(JoinError::VersionMismatch(Version((0, 0, 0))));
+                        return Err(JoinError::Timeout);
                     }
 
                     wait!();

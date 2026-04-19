@@ -410,7 +410,7 @@ impl EncodedMessage {
                         Err(Error::Disconnect)
                     } else {
                         log::error!("mach_msg failed: {r}");
-                        Ok(())
+                        Err(Error::Disconnect)
                     };
                 }
             }
