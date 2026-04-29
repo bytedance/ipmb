@@ -48,8 +48,11 @@ pub unsafe fn anon_pipe(identifier: &str, sa: &SecurityAttr) -> Result<(Handle, 
     Ok((read_pipe, write_pipe))
 }
 
-pub unsafe fn anon_pipe_half(sa: &SecurityAttr) -> Result<(Handle, String), Error> {
-    let name = format!("\\\\.\\pipe\\{}", util::rand_string(8));
+pub unsafe fn anon_pipe_half(
+    identifier: &str,
+    sa: &SecurityAttr,
+) -> Result<(Handle, String), Error> {
+    let name = format!("\\\\.\\pipe\\{}.{}", identifier, util::rand_string(8));
     let h_name: HSTRING = (&name).into();
 
     // Create read pipe

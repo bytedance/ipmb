@@ -11,10 +11,11 @@ use windows::Win32::{
 
 pub fn fetch_remote_process_handle(
     remote: &Remote,
+    identifier: &str,
     sa: &SecurityAttr,
 ) -> Result<OwnedHandle, Error> {
     unsafe {
-        let (read_pipe, name) = pipe::anon_pipe_half(sa)?;
+        let (read_pipe, name) = pipe::anon_pipe_half(identifier, sa)?;
         // Don't append object/region
         Message::new(
             Selector::unicast(LabelOp::True),

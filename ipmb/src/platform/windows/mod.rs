@@ -104,7 +104,7 @@ pub(crate) fn look_up(
                 Ok(server_process) => OwnedHandle::from_raw_handle(server_process.0 as _),
                 Err(err) => {
                     if Foundation::GetLastError() == Foundation::ERROR_ACCESS_DENIED {
-                        util::fetch_remote_process_handle(&remote, &im.sa)?
+                        util::fetch_remote_process_handle(&remote, identifier, &im.sa)?
                     } else {
                         return Err(Error::WinError(err));
                     }
